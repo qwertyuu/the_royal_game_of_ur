@@ -1,0 +1,71 @@
+#jeu .row_fluid div{
+    height:65px;
+}
+div[data-position]{
+    border:1px solid black;
+}
+div[data-position="0"], div[data-position="2"], div[data-position="10"], div[data-position="14"], div[data-position="16"]{
+    background-color:red;
+}
+
+#your_turn{
+    position:absolute;
+    left:49vw;
+    height: 50px;
+    font-size:50px;
+}
+
+body .jouable{
+    cursor:pointer;
+    border:1px dashed black;
+}
+
+
+
+#jeu{
+    
+    margin-top:25px;
+}
+
+.jeton {
+    width: 50px;
+    height: 50px;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    border-radius: 25px;
+    transition: 750ms all ease-out;
+}
+.jeton.pointe{
+    -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+    filter: alpha(opacity=50);
+    opacity: 0.5;
+}
+.player_1{
+    background-color: #111;
+}
+.player_2{
+    background-color: mediumpurple;
+}
+
+.fleche{
+    font-size:62px;
+    text-align:center;
+}
+
+.count_1, .count_2{
+    text-align:center;
+    color:white;
+}
+
+#fin{
+    font-size:200px;
+    font-weight:bold;
+    text-align:center;
+    line-height:600px;
+    color:#eee;
+    border:none;
+}
+
+#fin.jouable{
+    color:#333;
+}
