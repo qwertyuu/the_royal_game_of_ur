@@ -114,7 +114,7 @@ switch($_POST['action']){
             $old_pos = $result_jeton['jeton_position'];
             
             $jeton_ennemi = ya_tu_un_jeton_a($bd, $game_id, $jeton_newpos, $autre_player, true);
-            if($jeton_ennemi){
+            if($jeton_ennemi && $jeton_newpos >= 0){
                 //lol umad
                 $statement = $bd->prepare('INSERT INTO move (move_fk_jeton_id, move_fk_game_id, move_last_position, move_new_position, rosette) VALUES (:jeton_id, :game_id, :last_position, -1, 0)');
                 $statement->bindParam(':jeton_id', $jeton_ennemi['jeton_id'], PDO::PARAM_INT);
