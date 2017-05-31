@@ -19,7 +19,7 @@ if(isset($_GET['game_id']) && !isset($_SESSION['en_creation'])){
 
         $_SESSION['game_id'] = $_GET['game_id'];
         $_SESSION['joueur'] = 2;
-        $nb_jetons_partie = 7;
+        $nb_jetons_partie = 5;
         $values_insert = array();
         foreach(range(0, $nb_jetons_partie - 1) as $jeton_index){
             $values_insert[] = "(:game_id, 1, -1)";
