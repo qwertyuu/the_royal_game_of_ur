@@ -8,8 +8,8 @@ $game_id = $_POST['game_id'];
 $player = $_POST['player'];
 $autre_player = $player == 1 ? 2 : 1;
 require_once('function.php');
+require_once('configs.php');
 $joueur = new Joueur($player);
-$bd = new PDO('mysql:host=localhost;dbname=ur;charset=utf8', 'root', '');
 switch($_POST['action']){
     case 'refresh':
         $statement = $bd->prepare('SELECT en_attente, joueur_courant, en_creation, last_move_id FROM game WHERE game_id = :game_id');

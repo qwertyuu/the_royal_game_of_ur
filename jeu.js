@@ -63,6 +63,7 @@ function refresh(){
             if(data.hasOwnProperty('your_turn')){
                 $('#your_turn').remove();
                 $('body').append('<div id="your_turn">' + data.de + '</div>');
+                alert(data.possible_moves);
                 for(var move in data.possible_moves){
                     if(data.possible_moves.hasOwnProperty(move)){
                         $('div[data-position="'+ move +'"]').addClass('jouable').data('jeton_id', data.possible_moves[move]);

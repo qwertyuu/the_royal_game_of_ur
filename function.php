@@ -54,6 +54,7 @@ function generate_possible_moves($bd, $game_id, $player, $joueur, &$json_retour)
         $statement->bindParam(':autre_player', $autre_player, PDO::PARAM_INT);
         $statement->bindParam(':game_id', $game_id, PDO::PARAM_INT);
         $statement->execute();
+        unset($json_retour['your_turn']);
     }
 }
 

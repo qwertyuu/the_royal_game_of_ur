@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once('function.php');
-$bd = new PDO('mysql:host=localhost;dbname=ur;charset=utf8', 'root', '');
+require_once('configs.php');
 if(isset($_GET['reset'])){
     session_destroy();
 }
