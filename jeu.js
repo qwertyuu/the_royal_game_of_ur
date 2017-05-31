@@ -60,18 +60,16 @@ function refresh(){
                 $('.count_2').empty();
                 $('.count_2').append('<br>ADVERSAIRE:<br>En attente: ' + data.count.other.attente + '<br>' + 'Sorti: ' + data.count.other.out);
             }
+            if(data.hasOwnProperty('de')){
+                $('#your_turn').remove();
+                $('body').append('<div id="your_turn">' + data.de + '</div>');
+
+            }
             if(data.hasOwnProperty('your_turn')){
                 for(var move in data.possible_moves){
                     if(data.possible_moves.hasOwnProperty(move)){
                         $('div[data-position="'+ move +'"]').addClass('jouable').data('jeton_id', data.possible_moves[move]);
                     }
-                }
-                if(data.de == 0){
-                    setTimeout(refresh, 500);
-                }
-                else{
-                    $('#your_turn').remove();
-                    $('body').append('<div id="your_turn">' + data.de + '</div>');
                 }
             }
             else{
