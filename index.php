@@ -1,65 +1,136 @@
 <?php
 session_start();
-require_once('function.php');
-require_once('configs.php');
+$host = $_SERVER['HTTP_HOST'];
+$uri_sans_get = explode('?', $_SERVER['REQUEST_URI'])[0];
 if(isset($_GET['reset'])){
     session_destroy();
+    ?>
+    <meta http-equiv="Refresh" content="0;http://<?php echo $host . $uri_sans_get; ?>">
+    <?php
+    //header("Location: http://{$host}{$uri_sans_get}");
+    exit();
 }
-if(isset($_GET['game_id']) && !isset($_SESSION['en_creation'])){
-    //game existe
-    $statement = $bd->prepare('SELECT game_id FROM game WHERE game_id = :game_id');
-    $statement->bindParam(':game_id', $_GET['game_id'], PDO::PARAM_INT);
-    $statement->execute();
+require_once('function.php');
+require_once('configs.php');
 
-    $result = $statement->fetchAll(PDO::FETCH_ASSOC);
-    if($result){
-        $statement = $bd->prepare('UPDATE game SET en_creation=0,joueur_courant=1,en_attente=0 WHERE game_id = :game_id');
-        $statement->bindParam(':game_id', $_GET['game_id'], PDO::PARAM_INT);
-        $statement->execute();
-
-        $_SESSION['game_id'] = $_GET['game_id'];
-        $_SESSION['joueur'] = 2;
-        $nb_jetons_partie = 5;
-        $values_insert = array();
-        foreach(range(0, $nb_jetons_partie - 1) as $jeton_index){
-            $values_insert[] = "(:game_id, 1, -1)";
-            $values_insert[] = "(:game_id, 2, -1)";
+if(isset($_GET['action'])){
+    switch($_GET['action']){
+        case 'new':
+        //nouvelle game
+        $statement = $bd->prepare('INSERT INTO game (en_creation, nb_jetons) VALUES (1, :nb_jetons)');
+        if(in_array($_GET['nb_jetons'], array(3,5,7))){
+            $statement->bindParam(':nb_jetons', $_GET['nb_jetons'], PDO::PARAM_INT);
         }
-        $values_implode = implode(',', $values_insert);
-        $statement = $bd->prepare('INSERT INTO joueur_jeton (jeton_fk_game_id, jeton_joueur_position, jeton_position) VALUES ' . $values_implode);
-        $statement->bindParam(':game_id', $_GET['game_id'], PDO::PARAM_INT);
+        else{
+            $statement->bindParam(':nb_jetons', 5, PDO::PARAM_INT);
+        }
         $statement->execute();
-        $_SESSION['en_creation'] = False;
+        $lastId = $bd->lastInsertId('game_id');
+        $_SESSION['game_id'] = $lastId;
+        $_SESSION['en_creation'] = True;
+        $_SESSION['joueur'] = 1;
+        break;
 
-    }
-    else{
-        unset($_SESSION['game_id']);
-        unset($_SESSION['joueur']);
-        unset($_SESSION['en_creation']);
+        case 'refresh':
+        //on va voir si notre game a été créée
+        if($_SESSION['en_creation'] === True){
+            $statement = $bd->prepare('SELECT en_creation FROM game WHERE game_id = :game_id');
+            $statement->bindParam(':game_id', $_SESSION['game_id'], PDO::PARAM_INT);
+            $statement->execute();
+            $result = $statement->fetch(PDO::FETCH_ASSOC);
+
+            if($result && $result['en_creation'] == 0){
+                $_SESSION['en_creation'] = False;
+            }
+        }
         
+        break;
+        case 'join':
+        //rejoindre une game en cours
+        if(isset($_GET['game_id'])){
+            $statement = $bd->prepare('SELECT game_id, nb_jetons FROM game WHERE game_id = :game_id');
+            $statement->bindParam(':game_id', $_GET['game_id'], PDO::PARAM_INT);
+            $statement->execute();
+            $result = $statement->fetch(PDO::FETCH_ASSOC);
+            //game existe
+            if($result){
+                $statement = $bd->prepare('UPDATE game SET en_creation=0,joueur_courant=1,en_attente=0 WHERE game_id = :game_id');
+                $statement->bindParam(':game_id', $_GET['game_id'], PDO::PARAM_INT);
+                $statement->execute();
+
+                $_SESSION['game_id'] = $_GET['game_id'];
+                $_SESSION['joueur'] = 2;
+                $nb_jetons_partie = $result['nb_jetons'];
+                $values_insert = array();
+                foreach(range(0, $nb_jetons_partie - 1) as $jeton_index){
+                    $values_insert[] = "(:game_id, 1, -1)";
+                    $values_insert[] = "(:game_id, 2, -1)";
+                }
+                $values_implode = implode(',', $values_insert);
+                $statement = $bd->prepare('INSERT INTO joueur_jeton (jeton_fk_game_id, jeton_joueur_position, jeton_position) VALUES ' . $values_implode);
+                $statement->bindParam(':game_id', $_GET['game_id'], PDO::PARAM_INT);
+                $statement->execute();
+                $_SESSION['en_creation'] = False;
+
+            }
+            else{
+                unset($_SESSION['game_id']);
+                unset($_SESSION['joueur']);
+                unset($_SESSION['en_creation']);
+                
+            }
+        }
+        break;
     }
 }
-elseif(empty($_SESSION['joueur'])){
-    //nouvelle game
-    $statement = $bd->prepare('INSERT INTO game (en_creation) VALUES (1)');
-    $statement->execute();
-    $lastId = $bd->lastInsertId();
-    $_SESSION['game_id'] = $lastId;
-    $_SESSION['en_creation'] = True;
-    $_SESSION['joueur'] = 1;
-
-}
-elseif($_SESSION['en_creation'] === True){
-    //on va voir si notre game a été créée
-    $statement = $bd->prepare('SELECT en_creation FROM game WHERE game_id = :game_id');
-    $statement->bindParam(':game_id', $_SESSION['game_id'], PDO::PARAM_INT);
-    $statement->execute();
-    $result = $statement->fetch(PDO::FETCH_ASSOC);
-
-    if($result && $result['en_creation'] == 0){
-        $_SESSION['en_creation'] = False;
+else{
+    ?>
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+                <link rel="stylesheet" href="custom.css">
+            </head>
+            <body>
+                <div class="menu_principal">
+                    <div id="new_game" data-toggle="collapse" data-target="#new_game_options">
+                        Nouvelle partie
+                    </div>
+                    <div id="new_game_options" class="collapse">
+                        <form method="GET">
+                            <label for="nb_jetons">Longueur de la partie: </label><select name="nb_jetons" id="nb_jetons">
+                                <option value="3">Courte</option>
+                                <option value="5">Moyenne</option>
+                                <option value="7">Longue</option>
+                            </select>
+                            <input type="hidden" value="new" name="action">
+                            <button>Go!</button>
+                        </form>
+                    </div>
+                    
+                    <div id="load_game" data-toggle="collapse" data-target="#load_game_options">
+                        Rejoindre une partie
+                    </div>
+                    <div id="load_game_options" class="collapse">
+                        <form method="GET">
+                            <label for="game_id_picker">Game ID: </label><input name="game_id" id="game_id_picker">
+                            <input type="hidden" value="join" name="action">
+                            <button>Go!</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+                <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+            </body>
+        </html>
+    <?php
+    foreach($_SESSION as $k=>$v){
+        unset($_SESSION[$k]);
     }
+    exit();
 }
+
 
 
 if(isset($_SESSION['en_creation']) && $_SESSION['en_creation'] === False){
@@ -72,9 +143,9 @@ if(isset($_SESSION['en_creation']) && $_SESSION['en_creation'] === False){
     $statement->bindParam(':joueur', $_SESSION['joueur'], PDO::PARAM_INT);
     $statement->execute();
     $result = $statement->fetchAll(PDO::FETCH_ASSOC);
-    //var_dump($result);
 
     ?>
+    <!DOCTYPE html>
     <html>
         <head>
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
@@ -148,6 +219,9 @@ if(isset($_SESSION['en_creation']) && $_SESSION['en_creation'] === False){
             <div class="count_2 player_<?php echo $_SESSION['joueur'] == 1 ? 2 : 1; ?>">
 
             </div>
+            <a href="http://<?php echo $host . $uri_sans_get; ?>" class="btn btn-default">
+                Quitter
+            </a>
             <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
             <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
             <script src="jeu.js"></script>
@@ -158,16 +232,28 @@ if(isset($_SESSION['en_creation']) && $_SESSION['en_creation'] === False){
     
 }
 elseif(isset($_SESSION['en_creation'])){
-    echo 'TROUVE TOÉ KEKUN POUR JOUER LOL<br>';
-    echo '<input type="text" value="?game_id=' . $_SESSION['game_id'] . '">';
+    $unique = uniqid();
+    ?>
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link rel="stylesheet" href="custom.css">
+    </head>
+    <body>
+        <div>GAME ID: <?php echo $_SESSION['game_id']; ?></div>
+        <a href="http://<?php echo $host . $uri_sans_get; ?>?action=refresh" class="btn btn-default">
+            Refresh
+        </a>
+        <a href="http://<?php echo $host . $uri_sans_get; ?>" class="btn btn-default">
+            Retour
+        </a>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    </body>
+    </html>
+    <?php
 }
-else{
-    echo '?????';
-}
-//echo '<pre>';
-//var_dump($j, $jeu);
-//echo '</pre>';
-
-
 ?>
 

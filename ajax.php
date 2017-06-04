@@ -44,6 +44,8 @@ switch($_POST['action']){
                 $result_jetons = $statement->fetch(PDO::FETCH_ASSOC);
                 $json_retour['count']['yours'] = $result_jetons;
                 if($result_jetons['total'] == $result_jetons['out']){
+                    session_start();
+                    session_destroy();
                     $json_retour['gagnant'] = 'toi';
                 }
                 $statement = $bd->prepare('SELECT SUM(jeton_position=-1) AS \'attente\', SUM(jeton_position=-2) AS \'out\', SUM(jeton_position>-1) AS \'en_jeu\', COUNT(jeton_id) AS \'total\' FROM joueur_jeton WHERE jeton_joueur_position = :player AND jeton_fk_game_id = :game_id');
@@ -52,6 +54,8 @@ switch($_POST['action']){
                 $statement->execute();
                 $result_jetons = $statement->fetch(PDO::FETCH_ASSOC);
                 if($result_jetons['total'] == $result_jetons['out']){
+                    session_start();
+                    session_destroy();
                     $json_retour['gagnant'] = 'pas toi';
                 }
                 $json_retour['count']['other'] = $result_jetons;
@@ -88,6 +92,14 @@ switch($_POST['action']){
                     $json_retour['de'] = $result['last_de'];
                 }
                 generate_possible_moves($bd, $game_id, $player, $joueur, $json_retour);
+                if(count($json_retour['possible_moves']) == 0){
+                    $autre_player = $player == 1 ? 2 : 1;
+                    $statement = $bd->prepare('UPDATE game SET joueur_courant = :autre_player WHERE game_id = :game_id');
+                    $statement->bindParam(':autre_player', $autre_player, PDO::PARAM_INT);
+                    $statement->bindParam(':game_id', $game_id, PDO::PARAM_INT);
+                    $statement->execute();
+                    unset($json_retour['your_turn']);
+                }
             }
         }
         header('Content-Type: application/json');

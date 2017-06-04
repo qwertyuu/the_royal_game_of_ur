@@ -48,14 +48,6 @@ function generate_possible_moves($bd, $game_id, $player, $joueur, &$json_retour)
             }
         }
     }
-    if(count($json_retour['possible_moves']) == 0){
-        $autre_player = $player == 1 ? 2 : 1;
-        $statement = $bd->prepare('UPDATE game SET joueur_courant = :autre_player WHERE game_id = :game_id');
-        $statement->bindParam(':autre_player', $autre_player, PDO::PARAM_INT);
-        $statement->bindParam(':game_id', $game_id, PDO::PARAM_INT);
-        $statement->execute();
-        unset($json_retour['your_turn']);
-    }
 }
 
 function ya_tu_un_jeton_a($bd, $game_id, $position, $player=null, $return = false){
