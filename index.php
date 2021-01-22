@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 session_start();
 $host = $_SERVER['HTTP_HOST'];
 $uri_sans_get = explode('?', $_SERVER['REQUEST_URI'])[0];
@@ -13,6 +16,7 @@ if(isset($_GET['reset'])){
 require_once('function.php');
 require_once('configs.php');
 
+
 if(isset($_GET['action'])){
     switch($_GET['action']){
         case 'new':
@@ -24,7 +28,7 @@ if(isset($_GET['action'])){
         else{
             $statement->bindParam(':nb_jetons', 5, PDO::PARAM_INT);
         }
-        $statement->execute();
+        $j = $statement->execute();
         $lastId = $bd->lastInsertId('game_id');
         $_SESSION['game_id'] = $lastId;
         $_SESSION['en_creation'] = True;
@@ -62,14 +66,17 @@ if(isset($_GET['action'])){
                 $_SESSION['joueur'] = 2;
                 $nb_jetons_partie = $result['nb_jetons'];
                 $values_insert = array();
+            	$prepared = array();
                 foreach(range(0, $nb_jetons_partie - 1) as $jeton_index){
-                    $values_insert[] = "(:game_id, 1, -1)";
-                    $values_insert[] = "(:game_id, 2, -1)";
+                    $values_insert[] = "(?, 1, -1)";
+                    $values_insert[] = "(?, 2, -1)";
+                	$prepared[] = $_GET['game_id'];
+                	$prepared[] = $_GET['game_id'];
                 }
                 $values_implode = implode(',', $values_insert);
                 $statement = $bd->prepare('INSERT INTO joueur_jeton (jeton_fk_game_id, jeton_joueur_position, jeton_position) VALUES ' . $values_implode);
-                $statement->bindParam(':game_id', $_GET['game_id'], PDO::PARAM_INT);
-                $statement->execute();
+                //$statement->bindParam(':game_id', $_GET['game_id'], PDO::PARAM_INT);
+                $statement->execute($prepared);
                 $_SESSION['en_creation'] = False;
 
             }

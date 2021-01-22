@@ -29,12 +29,13 @@ SET time_zone = "+00:00";
 CREATE TABLE `game` (
   `game_id` int(11) NOT NULL,
   `en_creation` tinyint(1) NOT NULL,
-  `joueur_courant` int(11) NOT NULL,
-  `en_attente` tinyint(1) NOT NULL,
-  `last_move_id` int(11) NOT NULL,
-  `gagnee` tinyint(1) NOT NULL,
-  `gagnant_position` int(11) NOT NULL,
-  `last_de` int(11) NOT NULL
+  `nb_jetons` int(11) NULL,
+  `joueur_courant` int(11) NULL,
+  `en_attente` tinyint(1) NULL,
+  `last_move_id` int(11) NULL,
+  `gagnee` tinyint(1) NULL,
+  `gagnant_position` int(11) NULL,
+  `last_de` int(11) NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

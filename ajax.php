@@ -1,9 +1,10 @@
 <?php
-
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 if(!isset($_POST['action'])){
     exit();
 }
-error_reporting(0);
 $game_id = $_POST['game_id'];
 $player = $_POST['player'];
 $autre_player = $player == 1 ? 2 : 1;
@@ -160,7 +161,8 @@ switch($_POST['action']){
             $statement = $bd->prepare('UPDATE game SET last_move_id=:move_id, joueur_courant = :player, en_attente=0 WHERE game_id = :game_id');
             $statement->bindParam(':move_id', $lastId_move, PDO::PARAM_INT);
             $statement->bindParam(':game_id', $game_id, PDO::PARAM_INT);
-            $statement->bindParam(':player', $rosette == 0 ? $autre_player : $player, PDO::PARAM_INT);
+        	$p = $rosette == 0 ? $autre_player : $player;
+            $statement->bindParam(':player', $p, PDO::PARAM_INT);
             $statement->execute();
             $json_retour['state'] = 'good';
 
