@@ -68,7 +68,6 @@ switch($_POST['action']){
                 
                 $json_retour['state'] = 'update';
                 $json_retour['your_turn'] = True;
-                //$json_retour['last_move_id'] = $_POST['last_move'];
                 
                 if($result['en_attente'] == 0){
                     $json_retour['de'] = l_de();
