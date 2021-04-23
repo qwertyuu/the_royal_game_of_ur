@@ -1,12 +1,3 @@
--- phpMyAdmin SQL Dump
--- version 4.6.5.2
--- https://www.phpmyadmin.net/
---
--- Client :  127.0.0.1
--- Généré le :  Mar 30 Mai 2017 à 02:26
--- Version du serveur :  10.1.21-MariaDB
--- Version de PHP :  5.6.30
-
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
@@ -87,26 +78,6 @@ ALTER TABLE `joueur_jeton`
 --
 ALTER TABLE `move`
   ADD PRIMARY KEY (`move_id`);
-
---
--- AUTO_INCREMENT pour les tables exportées
---
-
---
--- AUTO_INCREMENT pour la table `game`
---
-ALTER TABLE `game`
-  MODIFY `game_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
---
--- AUTO_INCREMENT pour la table `joueur_jeton`
---
-ALTER TABLE `joueur_jeton`
-  MODIFY `jeton_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=197;
---
--- AUTO_INCREMENT pour la table `move`
---
-ALTER TABLE `move`
-  MODIFY `move_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=191;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
