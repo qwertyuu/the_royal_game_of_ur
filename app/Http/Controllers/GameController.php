@@ -33,7 +33,7 @@ class GameController extends Controller
                     'game_id' => $game_id,
                 ]);
                 $json_retour = ['state' => 'wait'];
-                if ($result->en_creation) {
+                if ((int)$result->en_creation) {
                     $json_retour['en_cours'] = false;
                 } else {
                     if ($last_move !== $result->last_move_id) {
@@ -80,7 +80,7 @@ class GameController extends Controller
                         $json_retour['state'] = 'update';
                         $json_retour['your_turn'] = true;
 
-                        if ($result->en_attente === 0) {
+                        if ((int)$result->en_attente === 0) {
                             $json_retour['de'] = $this->l_de();
                             if ($json_retour['de'] !== 0) {
                                 DB::update('UPDATE game SET en_attente = 1, last_de=:de WHERE game_id = :game_id', [
@@ -125,7 +125,7 @@ class GameController extends Controller
                     'game_id' => $game_id,
                 ]);
 
-                if ($result->en_creation === 0 && $result->en_attente === 1 && $result->joueur_courant === $player) {
+                if ((int)$result->en_creation === 0 && (int)$result->en_attente === 1 && $result->joueur_courant === $player) {
                     $result_jeton = DB::selectOne('SELECT jeton_position FROM joueur_jeton WHERE jeton_id = :jeton_id', [
                         'jeton_id' => $jeton_joue,
                     ]);

@@ -53,7 +53,7 @@ class HomeController extends Controller
                             'game_id' => $request->session()->get('game_id'),
                         ]);
 
-                        if($result && $result->en_creation === 0){
+                        if($result && (int)$result->en_creation === 0){
                             $request->session()->put('en_creation', false);
                         }
                     }
