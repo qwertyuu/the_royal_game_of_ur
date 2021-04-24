@@ -43,7 +43,7 @@ class HomeController extends Controller
                     $request->session()->put('game_id', $lastId);
                     $request->session()->put('en_creation', true);
                     $request->session()->put('joueur', 1);
-                    
+
                     break;
 
                 case 'refresh':
