@@ -33,80 +33,82 @@ class GameController extends Controller
                     'game_id' => $game_id,
                 ]);
                 $json_retour = ['state' => 'wait'];
-                if ((int)$result->en_creation) {
-                    $json_retour['en_cours'] = false;
-                } else {
-                    if ($last_move !== (int)$result->last_move_id) {
-                        $result_moves = DB::select('SELECT move_id, move_fk_jeton_id, move_new_position, jeton_joueur_position FROM move LEFT JOIN joueur_jeton ON jeton_id = move_fk_jeton_id WHERE move_id > :last_move AND move_fk_game_id = :game_id ORDER BY move_id ASC', [
-                            'game_id' => $game_id,
-                            'last_move' => $last_move,
-                        ]);
+                if ($result) {
+                    if ((int)$result->en_creation) {
+                        $json_retour['en_cours'] = false;
+                    } else {
+                        if ($last_move !== (int)$result->last_move_id) {
+                            $result_moves = DB::select('SELECT move_id, move_fk_jeton_id, move_new_position, jeton_joueur_position FROM move LEFT JOIN joueur_jeton ON jeton_id = move_fk_jeton_id WHERE move_id > :last_move AND move_fk_game_id = :game_id ORDER BY move_id ASC', [
+                                'game_id' => $game_id,
+                                'last_move' => $last_move,
+                            ]);
 
-                        foreach ($result_moves as $move) {
-                            $json_retour['moves'][] = [
-                                'new_pos' => $move->move_new_position,
-                                'jeton_id' => $move->move_fk_jeton_id,
-                                'joueur' => $move->jeton_joueur_position
-                            ];
-                        }
-                        $json_retour['last_move_id'] = (int)$result->last_move_id;
-
-                        $result_jetons = DB::selectOne('SELECT SUM(jeton_position=-1) AS \'attente\', SUM(jeton_position=-2) AS \'out\', SUM(jeton_position>-1) AS \'en_jeu\', COUNT(jeton_id) AS \'total\' FROM joueur_jeton WHERE jeton_joueur_position = :player AND jeton_fk_game_id = :game_id', [
-                            'game_id' => $game_id,
-                            'player' => $player,
-                        ]);
-                        $json_retour['count']['yours'] = (array)$result_jetons;
-                        if ((int)$result_jetons->total === (int)$result_jetons->out) {
-                            $request->session()->start();
-                            $request->session()->flush();
-                            $json_retour['gagnant'] = 'toi';
-                        }
-                        $result_jetons = DB::selectOne('SELECT SUM(jeton_position=-1) AS \'attente\', SUM(jeton_position=-2) AS \'out\', SUM(jeton_position>-1) AS \'en_jeu\', COUNT(jeton_id) AS \'total\' FROM joueur_jeton WHERE jeton_joueur_position = :player AND jeton_fk_game_id = :game_id', [
-                            'game_id' => $game_id,
-                            'player' => $autre_player,
-                        ]);
-                        if ((int)$result_jetons->total === (int)$result_jetons->out) {
-                            $request->session()->start();
-                            $request->session()->flush();
-                            $json_retour['gagnant'] = 'pas toi';
-                        }
-                        $json_retour['count']['other'] = (array)$result_jetons;
-                    }
-                    $json_retour['en_cours'] = true;
-                    $joueur_en_cours = (int)$result->joueur_courant;
-
-                    if ($joueur_en_cours === (int)$player) {
-
-                        $json_retour['state'] = 'update';
-                        $json_retour['your_turn'] = true;
-
-                        if ((int)$result->en_attente === 0) {
-                            $json_retour['de'] = $this->l_de();
-                            if ($json_retour['de'] !== 0) {
-                                DB::update('UPDATE game SET en_attente = 1, last_de=:de WHERE game_id = :game_id', [
-                                    'game_id' => $game_id,
-                                    'de' => $json_retour['de'],
-                                ]);
-                            } else {
-                                DB::update('UPDATE game SET last_de=:de WHERE game_id = :game_id', [
-                                    'game_id' => $game_id,
-                                    'de' => $json_retour['de'],
-                                ]);
+                            foreach ($result_moves as $move) {
+                                $json_retour['moves'][] = [
+                                    'new_pos' => $move->move_new_position,
+                                    'jeton_id' => $move->move_fk_jeton_id,
+                                    'joueur' => $move->jeton_joueur_position
+                                ];
                             }
-                        } else {
-                            $result = DB::selectOne('SELECT last_de FROM game WHERE game_id = :game_id', [
+                            $json_retour['last_move_id'] = (int)$result->last_move_id;
+
+                            $result_jetons = DB::selectOne('SELECT SUM(jeton_position=-1) AS \'attente\', SUM(jeton_position=-2) AS \'out\', SUM(jeton_position>-1) AS \'en_jeu\', COUNT(jeton_id) AS \'total\' FROM joueur_jeton WHERE jeton_joueur_position = :player AND jeton_fk_game_id = :game_id', [
                                 'game_id' => $game_id,
+                                'player' => $player,
                             ]);
-                            $json_retour['de'] = $result->last_de;
+                            $json_retour['count']['yours'] = (array)$result_jetons;
+                            if ((int)$result_jetons->total === (int)$result_jetons->out) {
+                                $request->session()->start();
+                                $request->session()->flush();
+                                $json_retour['gagnant'] = 'toi';
+                            }
+                            $result_jetons = DB::selectOne('SELECT SUM(jeton_position=-1) AS \'attente\', SUM(jeton_position=-2) AS \'out\', SUM(jeton_position>-1) AS \'en_jeu\', COUNT(jeton_id) AS \'total\' FROM joueur_jeton WHERE jeton_joueur_position = :player AND jeton_fk_game_id = :game_id', [
+                                'game_id' => $game_id,
+                                'player' => $autre_player,
+                            ]);
+                            if ((int)$result_jetons->total === (int)$result_jetons->out) {
+                                $request->session()->start();
+                                $request->session()->flush();
+                                $json_retour['gagnant'] = 'pas toi';
+                            }
+                            $json_retour['count']['other'] = (array)$result_jetons;
                         }
-                        $this->generate_possible_moves($game_id, $player, $joueur, $json_retour);
-                        if (count($json_retour['possible_moves']) === 0) {
-                            $autre_player = $player === 1 ? 2 : 1;
-                            DB::update('UPDATE game SET joueur_courant = :autre_player WHERE game_id = :game_id', [
-                                'autre_player' => $autre_player,
-                                'game_id' => $game_id,
-                            ]);
-                            unset($json_retour['your_turn']);
+                        $json_retour['en_cours'] = true;
+                        $joueur_en_cours = (int)$result->joueur_courant;
+
+                        if ($joueur_en_cours === (int)$player) {
+
+                            $json_retour['state'] = 'update';
+                            $json_retour['your_turn'] = true;
+
+                            if ((int)$result->en_attente === 0) {
+                                $json_retour['de'] = $this->l_de();
+                                if ($json_retour['de'] !== 0) {
+                                    DB::update('UPDATE game SET en_attente = 1, last_de=:de WHERE game_id = :game_id', [
+                                        'game_id' => $game_id,
+                                        'de' => $json_retour['de'],
+                                    ]);
+                                } else {
+                                    DB::update('UPDATE game SET last_de=:de WHERE game_id = :game_id', [
+                                        'game_id' => $game_id,
+                                        'de' => $json_retour['de'],
+                                    ]);
+                                }
+                            } else {
+                                $result = DB::selectOne('SELECT last_de FROM game WHERE game_id = :game_id', [
+                                    'game_id' => $game_id,
+                                ]);
+                                $json_retour['de'] = $result->last_de;
+                            }
+                            $this->generate_possible_moves($game_id, $player, $joueur, $json_retour);
+                            if (count($json_retour['possible_moves']) === 0) {
+                                $autre_player = $player === 1 ? 2 : 1;
+                                DB::update('UPDATE game SET joueur_courant = :autre_player WHERE game_id = :game_id', [
+                                    'autre_player' => $autre_player,
+                                    'game_id' => $game_id,
+                                ]);
+                                unset($json_retour['your_turn']);
+                            }
                         }
                     }
                 }
