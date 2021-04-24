@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Entities\Jeu;
-use App\Entities\Joueur;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -28,7 +26,7 @@ class HomeController extends Controller
         $host = $request->server('HTTP_HOST');
         $uri_sans_get = explode('?', $request->server('REQUEST_URI'))[0];
         if($request->get('reset')){
-            $request->session()->destroy();
+            $request->session()->flush();
             return response("<meta http-equiv=\"Refresh\" content=\"0;http://<?php echo $host . $uri_sans_get; ?>\">");
         }
         $action = $request->get('action');
@@ -37,7 +35,7 @@ class HomeController extends Controller
                 case 'new':
                     $bindings = ['nb_jetons' => 5];
 
-                    if (in_array($request->get('nb_jetons'), [3,5,7])) {
+                    if (in_array($request->get('nb_jetons'), [3, 5, 7])) {
                         $bindings['nb_jetons'] = $request->get('nb_jetons');
                     }
                     DB::insert('INSERT INTO game (en_creation, nb_jetons) VALUES (1, :nb_jetons)', $bindings);
@@ -55,7 +53,7 @@ class HomeController extends Controller
                         ]);
 
                         if($result && $result->en_creation === 0){
-                            $_SESSION['en_creation'] = false;
+                            $request->session()->put('en_creation', false);
                         }
                     }
                     break;
