@@ -13,8 +13,5 @@
 |
 */
 
-$router->get('/', function () use ($router) {
-    return $router->app->version();
-});
 $router->post('/ajax', 'GameController@userAction');
-$router->get('/home', 'HomeController@index');
+$router->get('/', 'HomeController@index');
