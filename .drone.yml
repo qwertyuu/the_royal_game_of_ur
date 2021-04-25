@@ -30,6 +30,10 @@ steps:
         path: /tmp/cache
 
   - name: docker-latest
+    when:
+      branch:
+        include:
+          - master
     image: plugins/docker
     settings:
       username:
@@ -42,11 +46,12 @@ steps:
       tags:
         - ${DRONE_COMMIT_BRANCH}-0.0.1
         - latest
-      when:
-        branch:
-          include:
-            - master
+
   - name: docker-staging
+    when:
+      branch:
+        exclude:
+          - master
     image: plugins/docker
     settings:
       username:
@@ -59,10 +64,6 @@ steps:
       tags:
         - ${DRONE_COMMIT_BRANCH}-0.0.1
         - staging
-      when:
-        branch:
-          exclude:
-            - master
 
 volumes:
   - name: DroneIO-Cache
