@@ -25,7 +25,7 @@ class HomeController extends Controller
 
         $host = $request->server('HTTP_HOST');
         $uri_sans_get = explode('?', $request->server('REQUEST_URI'))[0];
-        if($request->get('reset')){
+        if ($request->get('reset')) {
             $request->session()->flush();
             return response("<meta http-equiv=\"Refresh\" content=\"0;http://<?php echo $host . $uri_sans_get; ?>\">");
         }
@@ -48,12 +48,12 @@ class HomeController extends Controller
 
                 case 'refresh':
                     //on va voir si notre game a été créée
-                    if($request->session()->get('en_creation') === True){
+                    if ($request->session()->get('en_creation') === True) {
                         $result = DB::selectOne('SELECT en_creation FROM game WHERE game_id = :game_id', [
                             'game_id' => $request->session()->get('game_id'),
                         ]);
 
-                        if($result && (int)$result->en_creation === 0){
+                        if ($result && (int)$result->en_creation === 0) {
                             $request->session()->put('en_creation', false);
                         }
                     }
@@ -63,11 +63,15 @@ class HomeController extends Controller
                     if (!$request->get('game_id')) {
                         break;
                     }
-                    $result = DB::selectOne('SELECT game_id, nb_jetons FROM game WHERE game_id = :game_id', [
+                    $result = DB::selectOne('SELECT game_id, nb_jetons, en_creation FROM game WHERE game_id = :game_id', [
                         'game_id' => $request->get('game_id'),
                     ]);
-                    //game existe
-                    if($result){
+                    //game already exists
+                    if ($result) {
+                        // game is already started and the user is just refreshing their page
+                        if ((int)$result->en_creation === 0) {
+                            break;
+                        }
                         $nb_jetons_partie = $result->nb_jetons;
                         DB::update('UPDATE game SET en_creation=0,joueur_courant=1,en_attente=0 WHERE game_id = :game_id', [
                             'game_id' => $request->get('game_id'),
@@ -80,7 +84,7 @@ class HomeController extends Controller
 
                         $values_insert = [];
                         $prepared = [];
-                        foreach(range(0, $nb_jetons_partie - 1) as $jeton_index){
+                        foreach (range(0, $nb_jetons_partie - 1) as $jeton_index) {
                             $values_insert[] = "(?, 1, -1)";
                             $values_insert[] = "(?, 2, -1)";
                             $prepared[] = $game_id;
@@ -103,14 +107,14 @@ class HomeController extends Controller
             return view('main.menu');
         }
 
-        if($request->session()->get('en_creation') === false){
+        if ($request->session()->get('en_creation') === false) {
             return view('main.game', [
                 'joueur' => $request->session()->get('joueur'),
                 'game_id' => $request->session()->get('game_id'),
                 'host' => $host,
                 'uri_sans_get' => $uri_sans_get,
             ]);
-        } elseif ($request->session()->get('en_creation')){
+        } elseif ($request->session()->get('en_creation')) {
             return view('main.creating_game', [
                 'game_id' => $request->session()->get('game_id'),
                 'host' => $host,
