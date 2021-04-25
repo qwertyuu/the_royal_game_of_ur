@@ -14,30 +14,29 @@ class MakeGameDb extends Migration
     public function up()
     {
         Schema::create('game', function (Blueprint $table) {
-            $table->integer('game_id')->autoIncrement();
-            $table->boolean('en_creation');
-            $table->integer('nb_jetons')->nullable();
-            $table->integer('joueur_courant')->nullable();
-            $table->boolean('en_attente')->nullable();
+            $table->integer('id')->autoIncrement();
+            $table->boolean('creating');
+            $table->integer('token_amt')->nullable();
+            $table->integer('current_player')->nullable();
+            $table->boolean('waiting')->nullable();
             $table->integer('last_move_id')->nullable();
-            $table->boolean('gagnee')->nullable();
-            $table->integer('gagnant_position')->nullable();
-            $table->integer('last_de')->nullable();
+            $table->integer('winner')->nullable();
+            $table->integer('current_dice')->nullable();
         });
 
-        Schema::create('joueur_jeton', function (Blueprint $table) {
-            $table->integer('jeton_id')->autoIncrement();
-            $table->integer('jeton_fk_game_id');
-            $table->integer('jeton_joueur_position');
-            $table->integer('jeton_position');
+        Schema::create('player_chip', function (Blueprint $table) {
+            $table->integer('id')->autoIncrement();
+            $table->integer('game_id');
+            $table->integer('player');
+            $table->integer('position');
         });
 
         Schema::create('move', function (Blueprint $table) {
-            $table->integer('move_id')->autoIncrement();
-            $table->integer('move_fk_jeton_id');
-            $table->integer('move_fk_game_id');
-            $table->integer('move_last_position');
-            $table->integer('move_new_position');
+            $table->integer('id')->autoIncrement();
+            $table->integer('player_chip_id');
+            $table->integer('game_id');
+            $table->integer('old_position');
+            $table->integer('new_position');
             $table->boolean('rosette');
         });
     }
@@ -50,7 +49,7 @@ class MakeGameDb extends Migration
     public function down()
     {
         Schema::drop('game');
-        Schema::drop('joueur_jeton');
+        Schema::drop('player_chip');
         Schema::drop('move');
     }
 }
