@@ -29,7 +29,7 @@ steps:
       - name: DroneIO-Cache
         path: /tmp/cache
 
-  - name: docker
+  - name: docker-latest
     image: plugins/docker
     settings:
       username:
@@ -45,7 +45,7 @@ steps:
       when:
         branch:
           - master
-  - name: docker
+  - name: docker-staging
     image: plugins/docker
     settings:
       username:
