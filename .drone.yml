@@ -44,7 +44,8 @@ steps:
         - latest
       when:
         branch:
-          - master
+          include:
+            - master
   - name: docker-staging
     image: plugins/docker
     settings:
