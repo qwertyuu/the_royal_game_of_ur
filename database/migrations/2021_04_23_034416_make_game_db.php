@@ -22,6 +22,9 @@ class MakeGameDb extends Migration
             $table->integer('last_move_id')->nullable();
             $table->integer('winner')->nullable();
             $table->integer('current_dice')->nullable();
+            $table->boolean('dice_dirty')->default(true);
+            $table->timestamp('started_at')->useCurrent();
+            $table->timestamp('ended_at')->nullable();
         });
 
         Schema::create('player_chip', function (Blueprint $table) {
@@ -38,6 +41,7 @@ class MakeGameDb extends Migration
             $table->integer('old_position');
             $table->integer('new_position');
             $table->boolean('rosette');
+            $table->timestamp('happened_at')->useCurrent();
         });
     }
 
