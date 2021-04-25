@@ -42,6 +42,26 @@ steps:
       tags:
         - ${DRONE_COMMIT_BRANCH}-0.0.1
         - latest
+      when:
+        branch:
+          - master
+  - name: docker
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      repo: saaq.whnet.ca/qwertyuu/the_royal_game_of_ur
+      cache_from: "saaq.whnet.ca/qwertyuu/the_royal_game_of_ur:${DRONE_COMMIT_BRANCH}-0.0.1"
+      registry: saaq.whnet.ca
+      tags:
+        - ${DRONE_COMMIT_BRANCH}-0.0.1
+        - staging
+      when:
+        branch:
+          exclude:
+            - master
 
 volumes:
   - name: DroneIO-Cache
