@@ -30,22 +30,10 @@ steps:
         path: /tmp/cache
 
   - name: docker-latest
-    image: plugins/docker
-    settings:
-      username:
-        from_secret: docker_username
-      password:
-        from_secret: docker_password
-      repo: saaq.whnet.ca/qwertyuu/the_royal_game_of_ur
-      cache_from: "saaq.whnet.ca/qwertyuu/the_royal_game_of_ur:${DRONE_COMMIT_BRANCH}-0.0.1"
-      registry: saaq.whnet.ca
-      tags:
-        - ${DRONE_COMMIT_BRANCH}-0.0.1
-        - latest
-      when:
-        branch:
+    when:
+      branch:
+        include:
           - master
-  - name: docker-staging
     image: plugins/docker
     settings:
       username:
@@ -53,15 +41,27 @@ steps:
       password:
         from_secret: docker_password
       repo: saaq.whnet.ca/qwertyuu/the_royal_game_of_ur
-      cache_from: "saaq.whnet.ca/qwertyuu/the_royal_game_of_ur:${DRONE_COMMIT_BRANCH}-0.0.1"
+      cache_from: "saaq.whnet.ca/qwertyuu/the_royal_game_of_ur:latest"
       registry: saaq.whnet.ca
       tags:
-        - ${DRONE_COMMIT_BRANCH}-0.0.1
-        - staging
-      when:
-        branch:
-          exclude:
-            - master
+        - latest
+
+  - name: docker-staging
+    when:
+      branch:
+        include:
+          - develop
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      repo: saaq.whnet.ca/qwertyuu/the_royal_game_of_ur
+      cache_from: "saaq.whnet.ca/qwertyuu/the_royal_game_of_ur:latest-staging"
+      registry: saaq.whnet.ca
+      tags:
+        - latest-staging
 
 volumes:
   - name: DroneIO-Cache
