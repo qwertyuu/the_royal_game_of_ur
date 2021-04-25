@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Game;
+use App\Models\PlayerChip;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +27,7 @@ class HomeController extends Controller
 
         $host = $request->server('HTTP_HOST');
         $uri_sans_get = explode('?', $request->server('REQUEST_URI'))[0];
-        if($request->get('reset')){
+        if ($request->get('reset')) {
             $request->session()->flush();
             return response("<meta http-equiv=\"Refresh\" content=\"0;http://<?php echo $host . $uri_sans_get; ?>\">");
         }
@@ -33,61 +35,74 @@ class HomeController extends Controller
         if ($action) {
             switch ($action) {
                 case 'new':
-                    $bindings = ['nb_jetons' => 5];
+                    $nb_jetons = 5;
 
                     if (in_array($request->get('nb_jetons'), [3, 5, 7])) {
-                        $bindings['nb_jetons'] = $request->get('nb_jetons');
+                        $nb_jetons = $request->get('nb_jetons');
                     }
-                    DB::insert('INSERT INTO game (en_creation, nb_jetons) VALUES (1, :nb_jetons)', $bindings);
-                    $lastId = DB::getPdo()->lastInsertId();
-                    $request->session()->put('game_id', $lastId);
+                    Game::query()
+                        ->insert([
+                            'creating' => true,
+                            'token_amt' => $nb_jetons,
+                        ]);
+                    $last_id = DB::getPdo()->lastInsertId();
+                    $request->session()->put('game_id', $last_id);
                     $request->session()->put('en_creation', true);
                     $request->session()->put('joueur', 1);
 
                     break;
 
                 case 'refresh':
-                    //on va voir si notre game a été créée
-                    if($request->session()->get('en_creation') === True){
-                        $result = DB::selectOne('SELECT en_creation FROM game WHERE game_id = :game_id', [
-                            'game_id' => $request->session()->get('game_id'),
-                        ]);
+                    // check if the game has been created
+                    if ($request->session()->get('en_creation') === true) {
+                        /** @var Game $result */
+                        $result = Game::query()->find($request->session()->get('game_id'));
 
-                        if($result && (int)$result->en_creation === 0){
+                        if ($result && !$result->creating) {
                             $request->session()->put('en_creation', false);
                         }
                     }
                     break;
 
                 case 'join':
-                    if (!$request->get('game_id')) {
+                    $game_id = $request->get('game_id');
+                    if (!$game_id) {
                         break;
                     }
-                    $result = DB::selectOne('SELECT game_id, nb_jetons FROM game WHERE game_id = :game_id', [
-                        'game_id' => $request->get('game_id'),
-                    ]);
-                    //game existe
-                    if($result){
-                        $nb_jetons_partie = $result->nb_jetons;
-                        DB::update('UPDATE game SET en_creation=0,joueur_courant=1,en_attente=0 WHERE game_id = :game_id', [
-                            'game_id' => $request->get('game_id'),
-                        ]);
-
-                        $game_id = $request->get('game_id');
+                    /** @var Game $result */
+                    $result = Game::query()->find($request->get('game_id'));
+                    //game already exists
+                    if ($result) {
+                        // game is already started and the user is just refreshing their page
+                        if (!$result->creating) {
+                            break;
+                        }
+                        $nb_jetons_partie = $result->token_amt;
+                        Game::query()
+                            ->where('id', $game_id)
+                            ->update([
+                                'creating' => false,
+                                'current_player' => 1,
+                                'waiting' => false,
+                            ]);
 
                         $request->session()->put('game_id', $game_id);
                         $request->session()->put('joueur', 2);
 
-                        $values_insert = [];
-                        $prepared = [];
-                        foreach(range(0, $nb_jetons_partie - 1) as $jeton_index){
-                            $values_insert[] = "(?, 1, -1)";
-                            $values_insert[] = "(?, 2, -1)";
-                            $prepared[] = $game_id;
-                            $prepared[] = $game_id;
+                        $chips = [];
+                        for ($i = 0; $i < $nb_jetons_partie; $i++) {
+                            $chips[] = [
+                                'game_id' => $game_id,
+                                'player' => 1,
+                                'position' => -1,
+                            ];
+                            $chips[] = [
+                                'game_id' => $game_id,
+                                'player' => 2,
+                                'position' => -1,
+                            ];
                         }
-                        $values_implode = implode(',', $values_insert);
-                        DB::insert('INSERT INTO joueur_jeton (jeton_fk_game_id, jeton_joueur_position, jeton_position) VALUES ' . $values_implode, $prepared);
+                        PlayerChip::query()->insert($chips);
                         $request->session()->put('en_creation', false);
                     } else {
                         $request->session()->forget([
@@ -103,14 +118,14 @@ class HomeController extends Controller
             return view('main.menu');
         }
 
-        if($request->session()->get('en_creation') === false){
+        if ($request->session()->get('en_creation') === false) {
             return view('main.game', [
                 'joueur' => $request->session()->get('joueur'),
                 'game_id' => $request->session()->get('game_id'),
                 'host' => $host,
                 'uri_sans_get' => $uri_sans_get,
             ]);
-        } elseif ($request->session()->get('en_creation')){
+        } elseif ($request->session()->get('en_creation')) {
             return view('main.creating_game', [
                 'game_id' => $request->session()->get('game_id'),
                 'host' => $host,
