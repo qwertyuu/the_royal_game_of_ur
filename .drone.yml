@@ -33,7 +33,7 @@ steps:
     when:
       branch:
         include:
-          - develop
+          - master
     image: plugins/docker
     settings:
       username:
@@ -49,8 +49,8 @@ steps:
   - name: docker-staging
     when:
       branch:
-        exclude:
-          - master
+        include:
+          - develop
     image: plugins/docker
     settings:
       username:
