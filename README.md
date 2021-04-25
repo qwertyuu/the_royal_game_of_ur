@@ -28,6 +28,6 @@ Play!
 
 # TODO
 
-- [ ] Have a public dice that player roll with an action (click) instead of an automatic dice that is private like right now
-- [ ] Fix bug where game gets stuck if only one token is left for each player on the last square and no winning dice is thrown (might be fixed by point above)
+- [x] Have a public dice that player roll with an action (click) instead of an automatic dice that is private like right now
+- [x] Fix bug where game gets stuck if only one token is left for each player on the last square and no winning dice is thrown (might be fixed by point above)
 - [ ] Make game beautiful
