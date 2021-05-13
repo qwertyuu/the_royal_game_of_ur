@@ -1,6 +1,11 @@
 $(function () {
     $(document).on("click", "div.jouable", jouer);
     $(document).on("click", "#roll_dice", roll_dice);
+    document.addEventListener('keydown', (e) => {
+        if (e.code === "Space") {
+            $("#roll_dice").click();
+        }
+    });
     $(document).on({
         mouseenter: function () {
             var jeton_id = $(this).data('jeton_id');
