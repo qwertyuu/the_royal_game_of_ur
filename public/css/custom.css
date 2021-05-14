@@ -23,7 +23,6 @@ body .jouable{
 
 
 #jeu{
-    
     margin-top:25px;
 }
 
@@ -68,4 +67,8 @@ body .jouable{
 
 #fin.jouable{
     color:#333;
+}
+
+#game-share{
+    width: 300px;
 }
