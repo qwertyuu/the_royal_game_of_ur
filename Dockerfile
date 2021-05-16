@@ -44,6 +44,7 @@ RUN apt-get install -y supervisor
 RUN mkdir -p /var/log/supervisor
 ADD docker_resources/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD docker_resources/wait-for-it.sh /wait-for-it.sh
+ADD docker_resources/start.sh /start.sh
 
 
 COPY . /app/
@@ -51,4 +52,4 @@ RUN cd /app && mkdir storage/framework/sessions && cp .env.docker .env && chown 
 
 EXPOSE 80
 
-CMD ["/wait-for-it.sh ${DB_HOST}:${DB_PORT} -- /bin/sh /run.sh"]
+CMD ["./start.sh"]
