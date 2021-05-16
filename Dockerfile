@@ -51,4 +51,4 @@ RUN cd /app && mkdir storage/framework/sessions && cp .env.docker .env && chown 
 
 EXPOSE 80
 
-CMD ["/wait-for-it.sh $DB_HOST:$DB_PORT -- /bin/sh /run.sh"]
+CMD ["/wait-for-it.sh ${DB_HOST}:${DB_PORT} -- /bin/sh /run.sh"]
