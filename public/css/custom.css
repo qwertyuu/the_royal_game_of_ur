@@ -23,7 +23,6 @@ body .jouable{
 
 
 #jeu{
-    
     margin-top:25px;
 }
 
@@ -68,4 +67,40 @@ body .jouable{
 
 #fin.jouable{
     color:#333;
+}
+
+#game-share{
+    width: 300px;
+}
+
+#game_id_picker {
+    width:150px;
+}
+
+.menu, .creating_game {
+    height: 100%;
+    background: url('../images/full_board.jpg') bottom;
+    background-size: cover;
+}
+
+.join_game, .create_game, .game_created {
+    padding: 20px;
+    background: white;
+}
+
+.join_game {
+    border-top-right-radius: 11px;
+    border-bottom-right-radius: 11px;
+}
+
+.create_game {
+    border-top-left-radius: 11px;
+    border-bottom-left-radius: 11px;
+}
+
+.game_created {
+    display: block;
+    margin: auto;
+    padding: 20px;
+    border-radius: 11px;
 }
