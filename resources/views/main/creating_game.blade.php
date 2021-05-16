@@ -13,7 +13,7 @@
         <div class="game_created flex-row">
             <div class="flex-column">
                 <div class="p-2">
-                    <label for="game-share">Envoyer ce lien à votre ami<input type="text" id="game-share" class="form-control" onClick="this.select();" value="{{ $host . $uri_sans_get }}?game_id={{ $game_id }}&action=join"></label>
+                    <label for="game-share">Envoie ce lien à ton ami(e)!<input type="text" id="game-share" class="form-control" onClick="this.select();" value="{{ $host . $uri_sans_get }}?game_id={{ $game_id }}&action=join"></label>
                 </div>
             </div>
             <div class="flex-column">
