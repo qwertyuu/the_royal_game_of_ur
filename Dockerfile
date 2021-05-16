@@ -1,5 +1,6 @@
 FROM ubuntu:18.04
 
+ADD docker_resources/run.sh /run.sh
 RUN mkdir /app && apt-get update
 RUN apt-get install -y wget curl nano htop git unzip bzip2 software-properties-common locales
 
@@ -45,8 +46,8 @@ ADD docker_resources/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 
 COPY . /app/
-RUN cd /app && mkdir persist && mkdir storage/framework/sessions && touch persist/database.sqlite && cp .env.docker .env && chown -R www-data:www-data . && chmod -R 775 ./storage && composer install && php artisan migrate
+RUN cd /app && mkdir storage/framework/sessions && cp .env.docker .env && chown -R www-data:www-data . && chmod -R 775 ./storage && composer install && php artisan migrate
 
 EXPOSE 80
 
-ENTRYPOINT ["/usr/bin/supervisord"]
+ENTRYPOINT ["/run.sh"]
