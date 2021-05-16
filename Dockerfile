@@ -46,7 +46,7 @@ ADD docker_resources/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 
 COPY . /app/
-RUN cd /app && mkdir storage/framework/sessions && cp .env.docker .env && chown -R www-data:www-data . && chmod -R 775 ./storage && composer install
+RUN cd /app && mkdir storage/framework/sessions && cp .env.docker .env && chown -R www-data:www-data . && chmod -R 775 ./storage && composer install && chmod +x /run.sh
 
 EXPOSE 80
 
