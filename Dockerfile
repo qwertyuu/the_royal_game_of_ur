@@ -1,5 +1,6 @@
 FROM ubuntu:18.04
 
+ADD docker_resources/run.sh /run.sh
 RUN mkdir /app && apt-get update
 RUN apt-get install -y wget curl nano htop git unzip bzip2 software-properties-common locales
 
@@ -42,11 +43,13 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 RUN apt-get install -y supervisor
 RUN mkdir -p /var/log/supervisor
 ADD docker_resources/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+ADD docker_resources/wait-for-it.sh /wait-for-it.sh
+ADD docker_resources/start.sh /start.sh
 
 
 COPY . /app/
-RUN cd /app && mkdir persist && mkdir storage/framework/sessions && touch persist/database.sqlite && cp .env.docker .env && chown -R www-data:www-data . && chmod -R 775 ./storage && composer install && php artisan migrate
+RUN cd /app && mkdir storage/framework/sessions && cp .env.docker .env && chown -R www-data:www-data . && chmod -R 775 ./storage && composer install && chmod +x /run.sh && chmod +x /wait-for-it.sh && chmod +x /start.sh
 
 EXPOSE 80
 
-ENTRYPOINT ["/usr/bin/supervisord"]
+CMD ["/start.sh"]
