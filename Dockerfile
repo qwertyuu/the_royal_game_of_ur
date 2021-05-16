@@ -43,6 +43,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 RUN apt-get install -y supervisor
 RUN mkdir -p /var/log/supervisor
 ADD docker_resources/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+ADD docker_resources/wait-for-it.sh /wait-for-it.sh
 
 
 COPY . /app/
