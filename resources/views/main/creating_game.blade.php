@@ -6,21 +6,25 @@
     <link rel="stylesheet" href="css/custom.css">
     <title>UR!</title>
 </head>
-<body style="height: 100%">
+<body class="creating_game">
 <div class="d-flex justify-content-center" style="height: 100%">
-    <div class="d-flex flex-row align-items-center">
-        <div>
-            <div class="justify-content-center align-items-center">
-                <input type="text" id="game-share" onClick="this.select();" value="{{ $host . $uri_sans_get }}?game_id={{ $game_id }}&action=join">
+    <div class="d-flex">
+        <div class="game_created flex-row">
+            <div class="flex-column">
+                <div class="p-2">
+                    <label for="game-share">Envoyer ce lien à votre ami<input type="text" id="game-share" class="form-control" onClick="this.select();" value="{{ $host . $uri_sans_get }}?game_id={{ $game_id }}&action=join"></label>
+                </div>
             </div>
-            <div>
-                <div style="display: block; margin: auto">
-                    <a href="//{{ $host . $uri_sans_get }}?action=refresh" class="btn btn-default">
-                        Refresh
-                    </a>
-                    <a href="//{{ $host . $uri_sans_get }}" class="btn btn-default">
-                        Retour
-                    </a>
+            <div class="flex-column">
+                <div class="p-2">
+                    <div>
+                        <a href="//{{ $host . $uri_sans_get }}?action=refresh" class="btn btn-primary">
+                            Refresh
+                        </a>
+                        <a href="//{{ $host . $uri_sans_get }}" class="btn btn-default">
+                            Retour
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
