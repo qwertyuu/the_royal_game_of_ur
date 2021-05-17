@@ -117,6 +117,7 @@ body .jouable{
 }
 .game-cell {
     display: table-cell;
+    width: 33.3%;
 }
 .game-cell-row {
     display: table-row;
