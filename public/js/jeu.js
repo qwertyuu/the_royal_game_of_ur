@@ -67,7 +67,6 @@ function refresh() {
                     indicator_html = data.dice + ' - ton tour';
                 } else if (data.turn_state === 'dice') {
                     indicator_html = dice_roll;
-                    console.log(indicator_html);
                 }
             } else {
                 indicator_html = data.dice === null ? 'En attente de l\'autre joueur' : data.dice;
