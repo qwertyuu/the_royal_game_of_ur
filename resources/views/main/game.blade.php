@@ -65,7 +65,7 @@
             </div>
         </div>
     </div>
-    <div class="player-ui">
+    <div class="player-ui align-center">
         @if ($joueur === 2)
             <div id="fin" data-position="-2">
                 OUT
