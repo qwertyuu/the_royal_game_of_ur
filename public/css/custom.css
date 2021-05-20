@@ -28,10 +28,10 @@ body .jouable{
     filter: alpha(opacity=50);
     opacity: 0.5;
 }
-.jeton.player_1, .count_1{
+.jeton.player_1, .player_1 .count_1, .player_2 .count_2{
     background-color: #111;
 }
-.jeton.player_2, .count_2{
+.jeton.player_2, .player_1 .count_2, .player_2 .count_1{
     background-color: mediumpurple;
 }
 

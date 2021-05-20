@@ -38,6 +38,7 @@ function refresh() {
         success: function (data) {
             if (data.gagnant !== null) {
                 $('#jeu').text(data.gagnant ? 'WIN :)' : 'perdu');
+                $('#jeu').css('background', 'white');
                 return;
             }
             $('#last_move_id').val(data.last_move_id);
@@ -52,7 +53,7 @@ function refresh() {
                             $('.game-cell[data-position="' + move + '"]').addClass('jouable').data('jeton_id', data.possible_moves[move]);
                         }
                     }
-                    indicator_html = data.dice + ' - ton tour';
+                    indicator_html = data.dice;
                 } else if (data.turn_state === 'dice') {
                     indicator_html = dice_roll;
                 }
@@ -60,7 +61,12 @@ function refresh() {
                 indicator_html = data.dice === null ? 'En attente de l\'autre joueur' : data.dice;
                 setTimeout(refresh, 500);
             }
+            var myColor = $('#player').val() === "1" ? "#111" : "mediumpurple";
+            var otherColor = $('#player').val() !== "1" ? "#111" : "mediumpurple";
             $('#your_turn').html(indicator_html);
+            if (data.turn_state === 'play') {
+                $('#your_turn').css('color', data.your_turn ? myColor : otherColor);
+            }
             if (data.moves.length > 0) {
                 for (var move in data.moves) {
                     var jquery_jeton = $('div[data-jeton="' + data.moves[move].jeton_id + '"]');
