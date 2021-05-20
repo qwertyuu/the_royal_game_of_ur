@@ -7,19 +7,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>UR!</title>
 </head>
-<body>
+<body class="player_{{$joueur}}">
 <input type="hidden" id="game_id" value="{{ $game_id }}">
 <input type="hidden" id="player" value="{{ $joueur  }}">
 <input type="hidden" id="last_move_id" value="0">
 <div class="game">
-    <div class="player-ui align-center">
+    <div class="player-ui align-center @if ($joueur === 1) current-player @else other-player @endif">
         @if ($joueur === 1)
-            <div id="fin" data-position="-2">
-                OUT
-            </div>
+            <div id="your_turn"></div>
         @endif
     </div>
-    <div class="player-ui align-top">
+    <div class="player-ui align-top content">
         <div id="jeu">
             <div class="game-padding">
                 <div class="game-cell-row">
@@ -48,9 +46,9 @@
                     <div class="game-cell fleche">@if ($joueur === 2 && false)^@endif</div>
                 </div>
                 <div class="game-cell-row">
-                    <div class="game-cell"></div>
+                    <div class="game-cell out" @if ($joueur === 1)id="fin" data-position="-2"@endif>@if ($joueur === 1)<@endif</div>
                     <div class="game-cell" data-position="13"></div>
-                    <div class="game-cell"></div>
+                    <div class="game-cell out" @if ($joueur === 2)id="fin" data-position="-2"@endif>@if ($joueur === 2)>@endif</div>
                 </div>
                 <div class="game-cell-row">
                     <div class="game-cell" data-position="14"></div>
@@ -65,11 +63,9 @@
             </div>
         </div>
     </div>
-    <div class="player-ui align-center">
+    <div class="player-ui align-center @if ($joueur === 2) current-player @else other-player @endif">
         @if ($joueur === 2)
-            <div id="fin" data-position="-2">
-                OUT
-            </div>
+            <div id="your_turn"></div>
         @endif
     </div>
 </div>
@@ -82,7 +78,6 @@
         </a>
     </div>
 </div>
-<div id="your_turn"></div>
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
         integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"

@@ -6,10 +6,8 @@ div[data-position]{
 }
 
 #your_turn{
-    position:absolute;
-    left:49vw;
-    height: 50px;
     font-size:50px;
+    text-align: center;
 }
 
 body .jouable{
@@ -30,11 +28,31 @@ body .jouable{
     filter: alpha(opacity=50);
     opacity: 0.5;
 }
-.player_1{
+.jeton.player_1, .count_1{
     background-color: #111;
 }
-.player_2{
+.jeton.player_2, .count_2{
     background-color: mediumpurple;
+}
+
+.player_1 .game-cell.out {
+    text-align: left;
+}
+
+.player_2 .game-cell.out {
+    text-align: right;
+}
+
+@media only screen and (max-width: 600px) {
+    .player-ui.current-player {
+        width: 50%;
+    }
+    .player-ui.other-player {
+        width: 0;
+    }
+    .player-ui.content {
+        width: 50%;
+    }
 }
 
 .fleche{
@@ -47,12 +65,29 @@ body .jouable{
     color:white;
 }
 
+.player_1 #fin{
+    color: #1111116e;
+}
+
+.player_1 #fin.jouable{
+    color: #111111;
+}
+
+.player_2 #fin{
+    color: #9370db6e;
+}
+
+.player_2 #fin.jouable{
+    color: #9370db;
+}
+
 #fin{
-    font-size:27vh;
-    font-weight:bold;
-    text-align:center;
-    color:#eee;
-    border:none;
+    font-size: 8vh;
+    font-weight: bold;
+    color: #eee;
+    border: none;
+    line-height: 10px;
+    vertical-align: middle;
 }
 
 #fin.jouable{
@@ -133,4 +168,11 @@ body .jouable{
 }
 .align-center {
     vertical-align: middle;
+}
+.game-cell .out {
+    font-size: 77px;
+    vertical-align: middle;
+    line-height: 10px;
+    color: white;
+    text-align: right;
 }

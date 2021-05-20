@@ -36,23 +36,6 @@ function refresh() {
                 return;
             }
             $('#last_move_id').val(data.last_move_id);
-            if (data.moves.length > 0) {
-                for (var move in data.moves) {
-                    var jquery_jeton = $('div[data-jeton="' + data.moves[move].jeton_id + '"]');
-                    if (data.moves[move].new_pos < 0) {
-                        jquery_jeton.remove();
-                    }
-                    var pos = $('div[data-position="' + data.moves[move].new_pos + '"]').position();
-                    if (pos) {
-                        if (jquery_jeton.length) {
-                            jquery_jeton.css('left', pos.left + 'px');
-                            jquery_jeton.css('top', pos.top + 'px');
-                        } else {
-                            $('#jeu').append('<div data-jeton="' + data.moves[move].jeton_id + '" class="jeton player_' + data.moves[move].joueur + '" style="position:absolute;left:' + pos.left + 'px;top:' + pos.top + 'px"></div>');
-                        }
-                    }
-                }
-            }
             $('.count_1').html('VOUS:<br>En attente: ' + data.count.yours.attente + '<br>' + 'Sorti: ' + data.count.yours.out);
             $('.count_2').html('<br>ADVERSAIRE:<br>En attente: ' + data.count.other.attente + '<br>' + 'Sorti: ' + data.count.other.out);
             var dice_roll = '<div id="roll_dice" class="btn btn-default">Lancer le dé</div>';
@@ -73,6 +56,23 @@ function refresh() {
                 setTimeout(refresh, 500);
             }
             $('#your_turn').html(indicator_html);
+            if (data.moves.length > 0) {
+                for (var move in data.moves) {
+                    var jquery_jeton = $('div[data-jeton="' + data.moves[move].jeton_id + '"]');
+                    if (data.moves[move].new_pos < 0) {
+                        jquery_jeton.remove();
+                    }
+                    var pos = $('div[data-position="' + data.moves[move].new_pos + '"]').position();
+                    if (pos) {
+                        if (jquery_jeton.length) {
+                            jquery_jeton.css('left', pos.left + 'px');
+                            jquery_jeton.css('top', pos.top + 'px');
+                        } else {
+                            $('#jeu').append('<div data-jeton="' + data.moves[move].jeton_id + '" class="jeton player_' + data.moves[move].joueur + '" style="position:absolute;left:' + pos.left + 'px;top:' + pos.top + 'px"></div>');
+                        }
+                    }
+                }
+            }
         },
         error: function (a, b, c) {
             console.log('erreur refresh', a, b, c);
