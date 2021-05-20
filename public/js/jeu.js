@@ -16,6 +16,11 @@ $(function () {
             $('.pointe').removeClass('pointe');
         }
     }, "div.jouable");
+    $(document).on("click", ".jeton", function () {
+        var jeton_position = $(this).data('position');
+        var case_vise = $('div[data-position="' + jeton_position + '"]');
+        case_vise.click();
+    });
     refresh();
 });
 
@@ -44,7 +49,7 @@ function refresh() {
                 if (data.turn_state === 'play') {
                     for (var move in data.possible_moves) {
                         if (data.possible_moves.hasOwnProperty(move)) {
-                            $('div[data-position="' + move + '"]').addClass('jouable').data('jeton_id', data.possible_moves[move]);
+                            $('.game-cell[data-position="' + move + '"]').addClass('jouable').data('jeton_id', data.possible_moves[move]);
                         }
                     }
                     indicator_html = data.dice + ' - ton tour';
@@ -59,6 +64,7 @@ function refresh() {
             if (data.moves.length > 0) {
                 for (var move in data.moves) {
                     var jquery_jeton = $('div[data-jeton="' + data.moves[move].jeton_id + '"]');
+                    jquery_jeton.data('position', data.moves[move].new_pos);
                     if (data.moves[move].new_pos < 0) {
                         jquery_jeton.remove();
                     }
@@ -68,7 +74,7 @@ function refresh() {
                             jquery_jeton.css('left', pos.left + 'px');
                             jquery_jeton.css('top', pos.top + 'px');
                         } else {
-                            $('#jeu').append('<div data-jeton="' + data.moves[move].jeton_id + '" class="jeton player_' + data.moves[move].joueur + '" style="position:absolute;left:' + pos.left + 'px;top:' + pos.top + 'px"></div>');
+                            $('#jeu').append('<div data-jeton="' + data.moves[move].jeton_id + '" data-position="' + data.moves[move].new_pos + '" class="jeton player_' + data.moves[move].joueur + '" style="position:absolute;left:' + pos.left + 'px;top:' + pos.top + 'px"></div>');
                         }
                     }
                 }
