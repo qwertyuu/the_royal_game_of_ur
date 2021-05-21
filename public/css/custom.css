@@ -53,6 +53,18 @@ body .jouable{
     .player-ui.content {
         width: 50%;
     }
+    .menu_new_game {
+        height: 50% !important;
+    }
+    .title {
+        font-size: 20vw!important;
+        line-height: 25vw!important;
+        -webkit-text-stroke: 0.25vw black !important;
+        padding: 20px;
+    }
+}
+.menu_new_game {
+    height: calc(100% - 50vh);
 }
 
 .fleche{
@@ -175,4 +187,12 @@ body .jouable{
     line-height: 10px;
     color: white;
     text-align: right;
+}
+.title {
+    font-size: 20vh;
+    text-align: center;
+    font-family: 'Indie Flower', cursive;
+    -webkit-text-stroke: 0.25vh black;
+    line-height: 25vh;
+    color: white;
 }
