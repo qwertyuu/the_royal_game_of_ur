@@ -8,18 +8,22 @@ namespace App\Entities;
 class Jeu
 {
     /**
+     * @var array|int[]
+     */
+    public static array $POS_ROSETTES = [0, 2, 10, 14, 16];
+
+    /**
      * @var array
      */
-    public $planche;
+    public array $planche;
 
     /**
      * Jeu constructor.
      */
     function __construct(){
-        $pos_rosettes = [0, 2, 10, 14, 16];
         $this->planche = [];
         foreach(range(0, 19) as $index){
-            $this->planche[] = new Cellule(in_array($index, $pos_rosettes));
+            $this->planche[] = new Cellule(in_array($index, self::$POS_ROSETTES));
         }
     }
 }

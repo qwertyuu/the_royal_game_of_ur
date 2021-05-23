@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $winner
  * @property int $current_dice
  * @property bool $dice_dirty
+ * @property string $bot
  * @property \DateTime $ended_at
  */
 class Game extends Model
