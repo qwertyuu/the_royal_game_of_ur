@@ -52,6 +52,24 @@ class HomeController extends Controller
 
                     break;
 
+                case 'bot_game':
+                    $game_id = $request->session()->get('game_id');
+                    /** @var Game $result */
+                    $result = Game::query()->find($game_id);
+                    if ($result && $result->creating) {
+                        Game::query()
+                            ->where('id', $game_id)
+                            ->update([
+                                'bot' => $request->get('bot_behavior', 'tunehr'),
+                                'creating' => false,
+                                'current_player' => 1,
+                                'waiting' => false,
+                            ]);
+                        $request->session()->put('en_creation', false);
+                        $this->initialize_tokens($result->token_amt, $game_id);
+                    }
+                    break;
+
                 case 'refresh':
                     // check if the game has been created
                     if ($request->session()->get('en_creation') === true) {
@@ -72,12 +90,11 @@ class HomeController extends Controller
                     /** @var Game $result */
                     $result = Game::query()->find($request->get('game_id'));
                     //game already exists
-                    if ($result) {
+                    if ($result && !$result->bot) {
                         // game is already started and the user is just refreshing their page
                         if (!$result->creating) {
                             break;
                         }
-                        $nb_jetons_partie = $result->token_amt;
                         Game::query()
                             ->where('id', $game_id)
                             ->update([
@@ -88,22 +105,8 @@ class HomeController extends Controller
 
                         $request->session()->put('game_id', $game_id);
                         $request->session()->put('joueur', 2);
-
-                        $chips = [];
-                        for ($i = 0; $i < $nb_jetons_partie; $i++) {
-                            $chips[] = [
-                                'game_id' => $game_id,
-                                'player' => 1,
-                                'position' => -1,
-                            ];
-                            $chips[] = [
-                                'game_id' => $game_id,
-                                'player' => 2,
-                                'position' => -1,
-                            ];
-                        }
-                        PlayerChip::query()->insert($chips);
                         $request->session()->put('en_creation', false);
+                        $this->initialize_tokens($result->token_amt, $game_id);
                     } else {
                         $request->session()->forget([
                             'game_id',
@@ -132,5 +135,27 @@ class HomeController extends Controller
                 'uri_sans_get' => $uri_sans_get,
             ]);
         }
+    }
+
+    /**
+     * @param int $nb_jetons_partie
+     * @param $game_id
+     */
+    private function initialize_tokens(int $nb_jetons_partie, $game_id): void
+    {
+        $chips = [];
+        for ($i = 0; $i < $nb_jetons_partie; $i++) {
+            $chips[] = [
+                'game_id' => $game_id,
+                'player' => 1,
+                'position' => -1,
+            ];
+            $chips[] = [
+                'game_id' => $game_id,
+                'player' => 2,
+                'position' => -1,
+            ];
+        }
+        PlayerChip::query()->insert($chips);
     }
 }

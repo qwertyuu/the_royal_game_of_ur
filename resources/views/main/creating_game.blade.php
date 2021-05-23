@@ -25,6 +25,9 @@
                         <a href="//{{ $host . $uri_sans_get }}" class="btn btn-default">
                             Retour
                         </a>
+                        <a href="//{{ $host . $uri_sans_get }}?action=bot_game&bot_behavior=tunehr" class="btn btn-default">
+                            Contre un robot
+                        </a>
                     </div>
                 </div>
             </div>

@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Bots\Bot;
+use App\Entities\BotMove;
+use App\Bots\AlasBot;
+use App\Bots\TunehrBot;
 use App\Entities\Jeu;
 use App\Models\Game;
 use App\Models\Move;
@@ -15,6 +19,11 @@ use Illuminate\Support\Facades\DB;
  */
 class GameController extends Controller
 {
+    private $botStrategies = [
+        "alas" => AlasBot::class,
+        "tunehr" => TunehrBot::class,
+    ];
+
     /**
      * @param Request $request
      * @return \Illuminate\Http\Response|\Laravel\Lumen\Http\ResponseFactory
@@ -112,6 +121,27 @@ ORDER BY move.id ASC', [
                                 $json_retour['your_turn'] = false;
                             }
                         }
+                    } elseif ($game->bot) {
+                        // dans ce contexte, "autre_player" est le bot et $player est le seul joueur
+                        if ($json_retour['turn_state'] === 'dice') {
+                            $this->throw_dice($game_id, $autre_player, $player);
+                        } else {
+                            /** @var Bot $strategy */
+                            $strategy = new $this->botStrategies[$game->bot]();
+                            $possible_moves = $this->generate_possible_moves($game_id, $autre_player, $json_retour['dice']);
+                            $positions = array_keys($possible_moves);
+                            $possible_moves_for_bot = [];
+                            foreach ($positions as $position) {
+                                $possible_moves_for_bot[] = new BotMove($possible_moves[$position], $position);
+                            }
+                            $move = $strategy->play(
+                                PlayerChip::query()->where("game_id", $game_id)->get(),
+                                collect($possible_moves_for_bot),
+                                $autre_player,
+                                $player,
+                            );
+                            $this->play_jeton($game_id, $move->jeton_newpos, $player, $move->jeton_joue, $autre_player);
+                        }
                     }
                 }
                 return response(json_encode($json_retour), 200, [
@@ -120,74 +150,17 @@ ORDER BY move.id ASC', [
 
             case 'roll_dice':
                 if ($game->dice_dirty && $is_current_player) {
-                    $dice = $this->l_de();
-                    DB::table('dice_throw')->insert([
-                        'value' => $dice,
-                        'game_id' => $game_id,
-                        'player' => $player,
-                    ]);
-                    $update_parts = [
-                        'current_dice' => $dice,
-                        'id' => $game_id,
-                    ];
-                    $possible_moves = $this->generate_possible_moves($game_id, $player, $dice);
-                    if ($dice === 0 || count($possible_moves) === 0) {
-                        $update_parts['dice_dirty'] = true;
-                        $update_parts['current_player'] = $autre_player;
-                    } else {
-                        $update_parts['waiting'] = true;
-                        $update_parts['dice_dirty'] = false;
-                    }
-                    Game::query()
-                        ->where('id', $game_id)
-                        ->update($update_parts);
+                    $this->throw_dice($game_id, $player, $autre_player);
                 }
                 return response("{}", 200, [
                     'Content-Type' => 'application/json',
                 ]);
 
             case 'play':
-                $jeton_joue = (int)$request->post('jeton_id');
-                $jeton_newpos = (int)$request->post('new_pos');
-                //TODO: Ajouter une verif que le move est bon pour empêcher la triche
-
                 if (!$game->creating && $game->waiting && $is_current_player) {
-                    $jeton_ennemi = $this->get_chip_at($game_id, $jeton_newpos, $autre_player);
-                    if ($jeton_ennemi && $jeton_newpos >= 0) {
-                        Move::query()->insert([
-                            'player_chip_id' => $jeton_ennemi->id,
-                            'game_id' => $game_id,
-                            'old_position' => $jeton_newpos,
-                            'new_position' => -1,
-                            'rosette' => false,
-                        ]);
-                        $this->update_jeton_position($jeton_ennemi->id, -1);
-                    }
-
-                    $this->update_jeton_position($jeton_joue, $jeton_newpos);
-                    $rosette = 1;
-                    if (($jeton_newpos >= 0 && !(new Jeu())->planche[$jeton_newpos]->est_rosette) || ($jeton_newpos == -2)) {
-                        $rosette = 0;
-                    }
-
-                    /** @var PlayerChip $result_jeton */
-                    $result_jeton = PlayerChip::query()->find($jeton_joue);
-                    Move::query()->insert([
-                        'player_chip_id' => $jeton_joue,
-                        'game_id' => $game_id,
-                        'old_position' => $result_jeton->position,
-                        'new_position' => $jeton_newpos,
-                        'rosette' => $rosette,
-                    ]);
-
-                    Game::query()
-                        ->where('id', $game_id)
-                        ->update([
-                            'last_move_id' => DB::getPdo()->lastInsertId(),
-                            'current_player' => $rosette === 0 ? $autre_player : $player,
-                            'waiting' => false,
-                            'dice_dirty' => true,
-                        ]);
+                    $jeton_joue = (int)$request->post('jeton_id');
+                    $jeton_newpos = (int)$request->post('new_pos');
+                    $this->play_jeton($game_id, $jeton_newpos, $autre_player, $jeton_joue, $player);
                 }
                 return response("{}", 200, [
                     'Content-Type' => 'application/json',
@@ -202,7 +175,7 @@ ORDER BY move.id ASC', [
      * @param null $player
      * @return PlayerChip|null
      */
-    private function get_chip_at($game_id, $position, $player = null)
+    private function get_chip_at($game_id, $position, $player = null): ?PlayerChip
     {
         $query = PlayerChip::query()
             ->where('game_id', $game_id)
@@ -213,7 +186,7 @@ ORDER BY move.id ASC', [
         return $query->first();
     }
 
-    private function l_de()
+    private function l_de(): int
     {
         $count = 0;
         foreach (range(0, 3) as $de) {
@@ -300,5 +273,85 @@ ORDER BY move.id ASC', [
         PlayerChip::query()
             ->where('id', $jeton_joue)
             ->update(['position' => $jeton_newpos]);
+    }
+
+    /**
+     * @param int $game_id
+     * @param $player_lanceur_du_de
+     * @param int $player_a_qui_le_tour_si_de_0
+     */
+    private function throw_dice(int $game_id, $player_lanceur_du_de, int $player_a_qui_le_tour_si_de_0): void
+    {
+        $dice = $this->l_de();
+        DB::table('dice_throw')->insert([
+            'value' => $dice,
+            'game_id' => $game_id,
+            'player' => $player_lanceur_du_de,
+        ]);
+        $update_parts = [
+            'current_dice' => $dice,
+            'id' => $game_id,
+        ];
+        $possible_moves = $this->generate_possible_moves($game_id, $player_lanceur_du_de, $dice);
+        if ($dice === 0 || count($possible_moves) === 0) {
+            $update_parts['dice_dirty'] = true;
+            $update_parts['current_player'] = $player_a_qui_le_tour_si_de_0;
+        } else {
+            $update_parts['waiting'] = true;
+            $update_parts['dice_dirty'] = false;
+        }
+        Game::query()
+            ->where('id', $game_id)
+            ->update($update_parts);
+    }
+
+    /**
+     * @param int $game_id
+     * @param int $jeton_newpos
+     * @param int $autre_player
+     * @param int $jeton_joue
+     * @param $player
+     */
+    private function play_jeton(int $game_id, int $jeton_newpos, int $autre_player, int $jeton_joue, $player): void
+    {
+        //TODO: Ajouter une verif que le move est bon pour empêcher la triche
+        $jeton_ennemi = $this->get_chip_at($game_id, $jeton_newpos, $autre_player);
+        if ($jeton_ennemi && $jeton_newpos >= 0) {
+            Move::query()->insert([
+                'player_chip_id' => $jeton_ennemi->id,
+                'game_id' => $game_id,
+                'old_position' => $jeton_newpos,
+                'new_position' => -1,
+                'rosette' => false,
+            ]);
+            $this->update_jeton_position($jeton_ennemi->id, -1);
+        }
+
+        $rosette = 1;
+        if (($jeton_newpos >= 0 && !(new Jeu())->planche[$jeton_newpos]->est_rosette) || ($jeton_newpos == -2)) {
+            $rosette = 0;
+        }
+
+        /** @var PlayerChip $result_jeton */
+        $result_jeton = PlayerChip::query()->find($jeton_joue);
+
+        $this->update_jeton_position($jeton_joue, $jeton_newpos);
+
+        Move::query()->insert([
+            'player_chip_id' => $jeton_joue,
+            'game_id' => $game_id,
+            'old_position' => $result_jeton->position,
+            'new_position' => $jeton_newpos,
+            'rosette' => $rosette,
+        ]);
+
+        Game::query()
+            ->where('id', $game_id)
+            ->update([
+                'last_move_id' => DB::getPdo()->lastInsertId(),
+                'current_player' => $rosette === 0 ? $autre_player : $player,
+                'waiting' => false,
+                'dice_dirty' => true,
+            ]);
     }
 }
