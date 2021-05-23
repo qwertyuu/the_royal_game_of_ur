@@ -334,7 +334,6 @@ ORDER BY move.id ASC', [
 
         /** @var PlayerChip $result_jeton */
         $result_jeton = PlayerChip::query()->find($jeton_joue);
-
         $this->update_jeton_position($jeton_joue, $jeton_newpos);
 
         Move::query()->insert([
