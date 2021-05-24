@@ -49,7 +49,6 @@ class HomeController extends Controller
                     $request->session()->put('game_id', $last_id);
                     $request->session()->put('en_creation', true);
                     $request->session()->put('joueur', 1);
-
                     break;
 
                 case 'bot_game':

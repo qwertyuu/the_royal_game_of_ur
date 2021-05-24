@@ -125,12 +125,12 @@ body .jouable{
     background: white;
 }
 
-.join_game {
+.join_game, .bot_game {
     border-top-right-radius: 11px;
     border-bottom-right-radius: 11px;
 }
 
-.create_game {
+.create_game, .share_game {
     border-top-left-radius: 11px;
     border-bottom-left-radius: 11px;
 }
@@ -139,7 +139,6 @@ body .jouable{
     display: block;
     margin: auto;
     padding: 20px;
-    border-radius: 11px;
 }
 
 #jeu {

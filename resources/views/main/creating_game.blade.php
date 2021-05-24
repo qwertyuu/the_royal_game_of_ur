@@ -10,10 +10,10 @@
 <body class="creating_game">
 <div class="d-flex justify-content-center" style="height: 100%">
     <div class="d-flex">
-        <div class="game_created flex-row">
+        <div class="game_created flex-row share_game">
             <div class="flex-column">
                 <div class="p-2">
-                    <label for="game-share">Envoie ce lien à ton ami(e)!<input type="text" id="game-share" class="form-control" onClick="this.select();" value="{{ $host . $uri_sans_get }}?game_id={{ $game_id }}&action=join"></label>
+                    <label for="game-share">Partage ce numéro de partie à ton ami!<input type="text" id="game-share" class="form-control" onclick="this.select();" value="{{ $game_id }}" readonly=""></label>
                 </div>
             </div>
             <div class="flex-column">
@@ -25,12 +25,32 @@
                         <a href="//{{ $host . $uri_sans_get }}" class="btn btn-default">
                             Retour
                         </a>
-                        <a href="//{{ $host . $uri_sans_get }}?action=bot_game&bot_behavior=tunehr" class="btn btn-default">
-                            Contre un robot
-                        </a>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="d-flex">
+        <div class="game_created flex-row bot_game">
+            <form method="GET" class="form-group" action="//ur.test/">
+                <input type="hidden" name="action" value="bot_game">
+                <div class="flex-column">
+                    <div class="p-2">
+                        <label for="game-share">Choisis ton adversaire robot
+                            <select name="bot_behavior" id="nb_jetons" class="form-control">
+                                <option value="alas">Alas</option>
+                                <option value="fire">Fire</option>
+                                <option value="tunehr">Tunehr</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                <div class="flex-column">
+                    <div class="p-2">
+                        <button type="submit" class="btn btn-primary">Contre un robot</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>

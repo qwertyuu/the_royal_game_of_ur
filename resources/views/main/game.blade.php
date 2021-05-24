@@ -41,9 +41,9 @@
                         <div class="game-cell" data-position="11"></div>
                     </div>
                     <div class="game-cell-row">
-                        <div class="game-cell fleche">@if ($joueur === 1 && false)^@endif</div>
+                        <div class="game-cell"></div>
                         <div class="game-cell" data-position="12"></div>
-                        <div class="game-cell fleche">@if ($joueur === 2 && false)^@endif</div>
+                        <div class="game-cell"></div>
                     </div>
                     <div class="game-cell-row">
                         <div class="game-cell out" @if ($joueur === 1)id="fin" data-position="-2"@endif>@if ($joueur === 1)<@endif</div>
