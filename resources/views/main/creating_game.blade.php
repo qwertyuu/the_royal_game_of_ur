@@ -32,7 +32,7 @@
     </div>
     <div class="d-flex">
         <div class="game_created flex-row bot_game">
-            <form method="GET" class="form-group" action="//ur.test/">
+            <form method="GET" class="form-group" action="//{{ $host . $uri_sans_get }}/">
                 <input type="hidden" name="action" value="bot_game">
                 <div class="flex-column">
                     <div class="p-2">
