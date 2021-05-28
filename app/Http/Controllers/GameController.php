@@ -93,17 +93,27 @@ ORDER BY move.id ASC', [
                         $request->session()->start();
                         $request->session()->flush();
                         $json_retour['gagnant'] = true;
-                        Game::query()
-                            ->where('id', $game_id)
-                            ->update([
-                                'winner' => $player,
-                                'ended_at' => DB::raw('CURRENT_TIMESTAMP'),
-                            ]);
+                        if (!$game->winner) {
+                            Game::query()
+                                ->where('id', $game_id)
+                                ->update([
+                                    'winner' => $player,
+                                    'ended_at' => DB::raw('CURRENT_TIMESTAMP'),
+                                ]);
+                        }
                     }
                     if ((int)$jetons_other_player->total === (int)$jetons_other_player->out) {
                         $request->session()->start();
                         $request->session()->flush();
                         $json_retour['gagnant'] = false;
+                        if (!$game->winner) {
+                            Game::query()
+                                ->where('id', $game_id)
+                                ->update([
+                                    'winner' => $autre_player,
+                                    'ended_at' => DB::raw('CURRENT_TIMESTAMP'),
+                                ]);
+                        }
                     }
                     if ($game->dice_dirty) {
                         $json_retour['turn_state'] = 'dice';
