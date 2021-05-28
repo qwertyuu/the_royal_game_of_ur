@@ -164,6 +164,7 @@ body .jouable{
 .game-cell {
     display: table-cell;
     width: 33.3%;
+    height: 12.5%;
 }
 .game-cell-row {
     display: table-row;
