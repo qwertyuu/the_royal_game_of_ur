@@ -73,14 +73,15 @@ function refresh() {
                     jquery_jeton.data('position', data.moves[move].new_pos);
                     if (data.moves[move].new_pos < 0) {
                         jquery_jeton.remove();
-                    }
-                    var pos = $('div[data-position="' + data.moves[move].new_pos + '"]').position();
-                    if (pos) {
-                        if (jquery_jeton.length) {
-                            jquery_jeton.css('left', pos.left + 'px');
-                            jquery_jeton.css('top', pos.top + 'px');
-                        } else {
-                            $('#jeu').append('<div data-jeton="' + data.moves[move].jeton_id + '" data-position="' + data.moves[move].new_pos + '" class="jeton player_' + data.moves[move].joueur + '" style="position:absolute;left:' + pos.left + 'px;top:' + pos.top + 'px"></div>');
+                    } else {
+                        var pos = $('div[data-position="' + data.moves[move].new_pos + '"]').position();
+                        if (pos) {
+                            if (jquery_jeton.length) {
+                                jquery_jeton.css('left', pos.left + 'px');
+                                jquery_jeton.css('top', pos.top + 'px');
+                            } else {
+                                $('#jeu').append('<div data-jeton="' + data.moves[move].jeton_id + '" data-position="' + data.moves[move].new_pos + '" class="jeton player_' + data.moves[move].joueur + '" style="position:absolute;left:' + pos.left + 'px;top:' + pos.top + 'px"></div>');
+                            }
                         }
                     }
                 }
