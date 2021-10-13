@@ -3,9 +3,7 @@
 namespace App\Bots;
 
 use App\Entities\BotMove;
-use App\Entities\Jeu;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Class FireBot
@@ -13,6 +11,8 @@ use Illuminate\Support\Facades\Log;
  */
 class FireBot implements Bot
 {
+    use CommonBotTrait;
+
     /**
      * Given a valid boardState and a list of possible moves, outputs one of the possible moves to play
      *
@@ -27,14 +27,10 @@ class FireBot implements Bot
         if ($possible_moves->count() === 1) {
             return $possible_moves->first();
         }
-        $enemy_token_positions = $player_chips
-            ->where('player', $player_id)
-            ->pluck('position');
-        $possible_new_positions = $possible_moves->whereIn('jeton_newpos', $enemy_token_positions);
-        if ($possible_new_positions->isNotEmpty()) {
-            return $possible_new_positions->random();
+        [$enemy_token_positions, $possible_enemy_positions, $possible_rosette_moves] = $this->get_common($player_chips, $player_id, $possible_moves);
+        if ($possible_enemy_positions->isNotEmpty()) {
+            return $possible_enemy_positions->random();
         }
-        $possible_rosette_moves = $possible_moves->whereIn('jeton_newpos', Jeu::$POS_ROSETTES);
         if ($possible_rosette_moves->isNotEmpty()) {
             return $possible_rosette_moves->random();
         }
@@ -48,7 +44,6 @@ class FireBot implements Bot
             }
             if ($enemy_token_positions->search($common_position, true)) {
                 $position_of_enemy_token_index = array_search($common_position, $course);
-                Log::info("Found enemy token at position " . $common_position);
                 for ($position = $position_of_enemy_token_index; $position >= 0; $position--) {
                     $move = $possible_moves->firstWhere('jeton_newpos', $course[$position]);
                     if ($move) {
