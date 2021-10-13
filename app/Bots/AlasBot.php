@@ -6,7 +6,7 @@ use App\Entities\BotMove;
 use Illuminate\Support\Collection;
 
 /**
- * Class NaiveBot
+ * Class AlasBot
  * @package App\Bots
  */
 class AlasBot implements Bot
