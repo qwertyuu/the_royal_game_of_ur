@@ -85,12 +85,10 @@ class NeatoBot implements Bot
                 $bot_pawn_course_indices[] = $course_index;
                 $bot_chip_course_position_id_map[$course_index] = $player_chip->id;
             } else {
-                Log::info(json_encode($player_chip->position));
                 $course_index = array_search($player_chip->position, $player_course, true);
                 $enemy_pawn_course_indices[] = $course_index;
             }
         }
-        Log::info(config('ur_neat'));
         $body = json_encode([
             'pawn_per_player' => $pawn_per_player,
             'ai_pawn_out' => $bot_pawn_out,
@@ -99,7 +97,6 @@ class NeatoBot implements Bot
             'ai_pawn_positions' => $bot_pawn_course_indices,
             'enemy_pawn_positions' => $enemy_pawn_course_indices,
         ]);
-        Log::info($body);
         $response = $this->guzzleClient->post(config('ur_neat.baseurl') . '/infer', [
             'body' => $body,
         ]);
