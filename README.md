@@ -11,7 +11,7 @@ Meant to be playable online by theorically as many people as a server can handle
 1. Using php 7.4 or 8, issue the command `composer install`
 1. Copy the file `.env.example` to `.env` and change the corresponding values (db)
 1. run `php artisan migrate`
-1. Configure the `/public` directory with your web server of choice (nginx, apache)
+1. Configure the `/public` directory with your web server of choice (nginx, apache) or `php -S localhost:8000 -t public`
 
 # Usage
 

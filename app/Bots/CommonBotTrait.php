@@ -9,13 +9,13 @@ trait CommonBotTrait
 {
     /**
      * @param Collection $player_chips
-     * @param int $player_id
+     * @param int $enemy_id
      * @return Collection
      */
-    public function get_enemy_token_positions(Collection $player_chips, int $player_id): Collection
+    public function get_token_positions(Collection $player_chips, int $enemy_id): Collection
     {
         return $player_chips
-            ->where('player', $player_id)
+            ->where('player', $enemy_id)
             ->pluck('position');
     }
 
@@ -40,13 +40,13 @@ trait CommonBotTrait
 
     /**
      * @param Collection $player_chips
-     * @param int $player_id
+     * @param int $enemy_id
      * @param Collection $possible_moves
      * @return array
      */
-    public function get_common(Collection $player_chips, int $player_id, Collection $possible_moves): array
+    public function get_common(Collection $player_chips, int $enemy_id, Collection $possible_moves): array
     {
-        $enemy_token_positions = $this->get_enemy_token_positions($player_chips, $player_id);
+        $enemy_token_positions = $this->get_token_positions($player_chips, $enemy_id);
         return [
             $enemy_token_positions,
             $this->get_possible_enemy_positions($possible_moves, $enemy_token_positions),

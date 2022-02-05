@@ -38,6 +38,7 @@
                     <div class="p-2">
                         <label for="game-share">Choisis ton adversaire robot
                             <select name="bot_behavior" id="nb_jetons" class="form-control">
+                                <option value="neato">Neato</option>
                                 <option value="alas">Alas</option>
                                 <option value="fire">Fire</option>
                                 <option value="tunehr">Tunehr</option>
