@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Bots\Bot;
 use App\Bots\FireBot;
+use App\Bots\NeatoBot;
 use App\Entities\BotMove;
 use App\Bots\AlasBot;
 use App\Bots\TunehrBot;
@@ -24,6 +25,7 @@ class GameController extends Controller
         "alas" => AlasBot::class,
         "tunehr" => TunehrBot::class,
         "fire" => FireBot::class,
+        "neato" => NeatoBot::class,
     ];
 
     /**
@@ -139,19 +141,27 @@ ORDER BY move.id ASC', [
                             $this->throw_dice($game_id, $autre_player, $player);
                         } else {
                             /** @var Bot $strategy */
-                            $strategy = new $this->botStrategies[$game->bot]();
+                            $strategy = app($this->botStrategies[$game->bot]);
                             $possible_moves = $this->generate_possible_moves($game_id, $autre_player, $json_retour['dice']);
                             $positions = array_keys($possible_moves);
                             $possible_moves_for_bot = [];
                             foreach ($positions as $position) {
                                 $possible_moves_for_bot[] = new BotMove($possible_moves[$position], $position);
                             }
-                            $move = $strategy->play(
-                                PlayerChip::query()->where("game_id", $game_id)->get(),
-                                collect($possible_moves_for_bot),
-                                $autre_player,
-                                $player,
-                            );
+                            if (count($possible_moves_for_bot) === 1) {
+                                $move = $possible_moves_for_bot[0];
+                            } else {
+                                $move = $strategy->play(
+                                    PlayerChip::query()->where("game_id", $game_id)->get(),
+                                    collect($possible_moves_for_bot),
+                                    $jetons_current_player->total,
+                                    $jetons_other_player->out,
+                                    $jetons_current_player->out,
+                                    $json_retour['dice'],
+                                    $autre_player,
+                                    $player,
+                                );
+                            }
                             $this->play_jeton($game_id, $move->jeton_newpos, $player, $move->jeton_joue, $autre_player);
                         }
                     }

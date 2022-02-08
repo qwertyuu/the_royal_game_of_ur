@@ -9,9 +9,15 @@ Meant to be playable online by theorically as many people as a server can handle
 # Installation for development
 
 1. Using php 7.4 or 8, issue the command `composer install`
-1. Copy the file `.env.example` to `.env` and change the corresponding values (db)
-1. run `php artisan migrate`
-1. Configure the `/public` directory with your web server of choice (nginx, apache)
+2. Copy the file `.env.example` to `.env` and change the corresponding values (db)
+3. run `php artisan migrate`
+4. Configure the `/public` directory with your web server of choice (nginx, apache) or `php -S localhost:8000 -t public`
+
+## Optional: Neato Bot
+
+If you want to have "Neato" bot working locally, you need to set up https://github.com/qwertyuu/go-ur (or any other API that supports the same payload/contract)
+
+Once it is done, set the `UR_NEAT_BASEURL` to the appropriate base URL. The /infer endpoint is not needed here.
 
 # Usage
 

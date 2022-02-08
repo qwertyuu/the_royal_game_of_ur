@@ -6,9 +6,10 @@
     "type": "project",
     "require": {
         "php": "^7.4|^8.0",
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^7.4",
         "illuminate/session": "^8.38",
-        "laravel/lumen-framework": "^8.0",
-        "ext-json": "*"
+        "laravel/lumen-framework": "^8.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
