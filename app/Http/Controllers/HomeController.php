@@ -33,7 +33,7 @@ class HomeController extends Controller
                 'Expires'             => '0',
                 'Pragma'              => 'public'
             ];
-            $list = DB::table($type)::all()->toArray();
+            $list = DB::table($type)->get()->toArray();
 
             # add headers for each column in the CSV download
             array_unshift($list, array_keys($list[0]));
