@@ -35,6 +35,10 @@ class HomeController extends Controller
             ];
             $list = DB::table($type)->get()->toArray();
 
+            $list = array_map(function ($value) {
+                return (array)$value;
+            }, $list);
+
             # add headers for each column in the CSV download
             array_unshift($list, array_keys($list[0]));
 
