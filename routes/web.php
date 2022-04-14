@@ -15,3 +15,4 @@
 
 $router->post('/ajax', 'GameController@userAction');
 $router->get('/', 'HomeController@index');
+$router->get('/export', 'HomeController@export');
