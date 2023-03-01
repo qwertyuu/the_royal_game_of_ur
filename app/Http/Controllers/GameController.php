@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Bots\Bot;
 use App\Bots\FireBot;
 use App\Bots\NeatoBot;
+use App\Bots\ExpectoBot;
 use App\Entities\BotMove;
 use App\Bots\AlasBot;
 use App\Bots\TunehrBot;
@@ -26,6 +27,7 @@ class GameController extends Controller
         "tunehr" => TunehrBot::class,
         "fire" => FireBot::class,
         "neato" => NeatoBot::class,
+        "expecto" => ExpectoBot::class,
     ];
 
     /**
