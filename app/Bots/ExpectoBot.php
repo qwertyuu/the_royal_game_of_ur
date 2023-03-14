@@ -61,9 +61,13 @@ class ExpectoBot implements Bot
         $player_pawn_in_play = 0;
 
         $payload_per_pawn = [];
+        $pawn_ids = [];
 
         /** @var PlayerChip $player_chip */
         foreach ($player_chips as $player_chip) {
+            if ($player_chip->position < 0) {
+                continue;
+            }
             if ($player_chip->player === $bot_id) {
                 $game_positions[$player_chip->position] = "L";
                 $bot_pawn_in_play++;
@@ -110,52 +114,50 @@ class ExpectoBot implements Bot
             7, 7, 7,
         ];
 
-        /** @var PlayerChip $player_chip */
-        foreach ($player_chips as $player_chip) {
+        foreach ($possible_moves as $possible_move) {
+            // find the move in $player_chips
+            $player_chip = $player_chips->where('id', $possible_move->jeton_joue)->first();
             $x = 0;
             $y = 0;
-            if ($player_chip->player === $bot_id) {
-                if ($player_chip->position === -1) {
-                    if ($player_chip->player === $bot_id) {
-                        $x = 0;
-                        $y = 4;
-                    } else {
-                        $x = 2;
-                        $y = 4;
-                    }
+            if ($player_chip->position === -1) {
+                if ($player_chip->player === $bot_id) {
+                    $x = 0;
+                    $y = 4;
                 } else {
-                    $x = $pos_to_x[$player_chip->position];
-                    $y = $pos_to_y[$player_chip->position];
+                    $x = 2;
+                    $y = 4;
                 }
-                $payload_per_pawn[] = [
-                    'game' => $game_positions_string,
-                    'light_score' => $bot_pawn_out,
-                    'dark_score' => $player_pawn_out,
-                    'roll' => $dice,
-                    'light_left' => $pawn_per_player - $bot_pawn_out - $bot_pawn_in_play,
-                    'dark_left' => $pawn_per_player - $player_pawn_out - $player_pawn_in_play,
-                    'x' => $x,
-                    'y' => $y,
-                    'light_turn' => true,
-                ];
+            } else {
+                $x = $pos_to_x[$player_chip->position];
+                $y = $pos_to_y[$player_chip->position];
             }
+            $payload_per_pawn[] = [
+                'game' => $game_positions_string,
+                'light_score' => $bot_pawn_out,
+                'dark_score' => $player_pawn_out,
+                'roll' => $dice,
+                'light_left' => $pawn_per_player - $bot_pawn_out - $bot_pawn_in_play,
+                'dark_left' => $pawn_per_player - $player_pawn_out - $player_pawn_in_play,
+                'x' => $x,
+                'y' => $y,
+                'light_turn' => true,
+            ];
+            $pawn_ids[] = $player_chip->id;
         }
 
-        var_dump($payload_per_pawn);
         $response = $this->guzzleClient->post(config('ur_expectimax.baseurl') . '/infer', [
             'body' => json_encode($payload_per_pawn),
+            'headers' => [
+                'Content-Type' => 'application/json',
+            ],
         ]);
 
         $decoded_response = json_decode($response->getBody(), true);
         $utilities = $decoded_response['utilities'];
-        var_dump($utilities);
 
         // Get the top utilities index and pick that move
         $ai_picked_move_index = array_search(max($utilities), $utilities, true);
-        $ai_picked_move = $possible_moves[$ai_picked_move_index];
-        // TODO: Make a map of the move IDs to the possible moves so we can get the move ID from the index
-        $ai_picked_chip_id = null;
-
-        return $possible_moves->firstWhere('jeton_joue', $ai_picked_chip_id);
+        $ai_picked_move = $pawn_ids[$ai_picked_move_index];
+        return $possible_moves->where('jeton_joue', $ai_picked_move)->first();
     }
 }
