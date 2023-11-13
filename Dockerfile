@@ -1,4 +1,4 @@
-FROM saaq.whnet.ca/whnet/ubuntu-laravel-lumen:latest
+FROM harbor.whnet.ca/saaq/whnet/ubuntu-laravel-lumen:latest
 
 ADD docker_resources/run.sh /run.sh
 ADD docker_resources/www.conf /etc/php/7.4/fpm/pool.d/www.conf
