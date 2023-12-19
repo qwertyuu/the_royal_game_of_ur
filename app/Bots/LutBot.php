@@ -100,7 +100,7 @@ class LutBot implements Bot
             'light_turn' => false,
         ];
 
-        $response = $this->guzzleClient->post(config('ur_expectimax.baseurl') . '/jsonEndpoint', [
+        $response = $this->guzzleClient->post(config('ur_lut.baseurl') . '/jsonEndpoint', [
             'body' => json_encode($payload_per_pawn),
             'headers' => [
                 'Content-Type' => 'application/json',

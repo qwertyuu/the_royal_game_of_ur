@@ -70,6 +70,7 @@ $app->singleton('session.store', function () use ($app) {
 $app->configure('app');
 $app->configure('ur_neat');
 $app->configure('ur_expectimax');
+$app->configure('ur_lut');
 
 /*
 |--------------------------------------------------------------------------
