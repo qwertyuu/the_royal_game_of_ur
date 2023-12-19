@@ -6,6 +6,7 @@ use App\Bots\Bot;
 use App\Bots\FireBot;
 use App\Bots\NeatoBot;
 use App\Bots\ExpectoBot;
+use App\Bots\LutBot;
 use App\Entities\BotMove;
 use App\Bots\AlasBot;
 use App\Bots\TunehrBot;
@@ -28,6 +29,7 @@ class GameController extends Controller
         "fire" => FireBot::class,
         "neato" => NeatoBot::class,
         "expecto" => ExpectoBot::class,
+        "lut" => LutBot::class,
     ];
 
     /**
