@@ -92,8 +92,8 @@ class LutBot implements Bot
         }
         $payload_per_pawn = [
             'game' => $game_positions_string,
-            'light_score' => $player_pawn_out,
-            'dark_score' => $bot_pawn_out,
+            'light_score' => $player_pawn_out + (7 - $pawn_per_player),
+            'dark_score' => $bot_pawn_out + (7 - $pawn_per_player),
             'roll' => $dice,
             'dark_left' => $pawn_per_player - $bot_pawn_out - $bot_pawn_in_play,
             'light_left' => $pawn_per_player - $player_pawn_out - $player_pawn_in_play,
