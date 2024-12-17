@@ -22,7 +22,11 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Exposer le port 9000 pour PHP-FPM
 EXPOSE 9000
+ADD docker_resources/run.sh /run.sh
+ADD docker_resources/www.conf /etc/php/7.4/fpm/pool.d/www.conf
+ADD docker_resources/default /etc/nginx/sites-enabled/
+ADD docker_resources/nginx.conf /etc/nginx/
+ADD docker_resources/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY . /app/
 RUN cd /app && mkdir storage/framework/sessions && composer install
-#ENTRYPOINT ["bash"]
-CMD ["php", "-S", "localhost:9000", "-t", "/app/public"]
+ENTRYPOINT ["/usr/bin/supervisord"]
