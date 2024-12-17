@@ -32,4 +32,4 @@ ADD docker_resources/start.sh /start.sh
 COPY . /app/
 RUN cd /app && mkdir storage/framework/sessions && composer install && chmod +x /run.sh && chmod +x /wait-for-it.sh && chmod +x /start.sh
 WORKDIR /
-ENTRYPOINT ["bash", "sleep", "infinity"]
+ENTRYPOINT ["bash", "tail", "-f", "/dev/null"]
