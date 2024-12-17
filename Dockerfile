@@ -20,9 +20,6 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 # Installer Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Changer les permissions du répertoire de stockage
-RUN chown -R www-data:www-data /var/www/storage
-
 # Exposer le port 9000 pour PHP-FPM
 EXPOSE 9000
 
