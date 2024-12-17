@@ -1,5 +1,4 @@
-# Utiliser l'image PHP 8.0 avec FPM
-FROM php:8.0-fpm
+FROM php:8.0-fpm-alpine
 
 # Installer les dépendances système nécessaires
 RUN apt-get update && apt-get install -y \
