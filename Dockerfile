@@ -24,6 +24,5 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 EXPOSE 9000
 COPY . /app/
 RUN cd /app && mkdir storage/framework/sessions && composer install
-WORKDIR /
 ENTRYPOINT ["bash"]
-CMD ["php", "-S", "localhost:9000", "-t", "public"]
+CMD ["php", "-S", "localhost:9000", "-t", "/app/public"]
