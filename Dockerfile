@@ -22,9 +22,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Exposer le port 9000 pour PHP-FPM
 EXPOSE 9000
-
-# Démarrer PHP-FPM
-#CMD ["php-fpm"]
+WORKDIR /
 ADD docker_resources/run.sh /run.sh
 ADD docker_resources/www.conf /etc/php/7.4/fpm/pool.d/www.conf
 ADD docker_resources/default /etc/nginx/sites-enabled/
