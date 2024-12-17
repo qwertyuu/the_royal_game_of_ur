@@ -1,4 +1,5 @@
-FROM php:8.0-fpm-alpine
+# Utiliser l'image PHP 8.0 avec FPM
+FROM php:8.0-fpm
 
 # Installer les dépendances système nécessaires
 RUN apt-get update && apt-get install -y \
@@ -23,5 +24,5 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 EXPOSE 9000
 COPY . /app/
 RUN cd /app && mkdir storage/framework/sessions && composer install
-ENTRYPOINT ["bash"]
+#ENTRYPOINT ["bash"]
 CMD ["php", "-S", "localhost:9000", "-t", "/app/public"]
