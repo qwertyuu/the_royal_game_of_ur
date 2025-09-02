@@ -5,6 +5,7 @@ FROM php:8.0-fpm-alpine
 RUN apk add --no-cache \
     nginx \
     supervisor \
+    mysql-client \
     # PHP extension dependencies
     libpng \
     libjpeg-turbo \
@@ -40,11 +41,9 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 COPY . .
 
-# Install production dependencies and setup directories
+# Install production dependencies - let entrypoint handle directories
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress \
-    && composer clear-cache \
-    && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
-    && chown -R www-data:www-data storage bootstrap/cache
+    && composer clear-cache
 
 # Copy optimized configurations
 COPY docker_resources/nginx-alpine.conf /etc/nginx/nginx.conf

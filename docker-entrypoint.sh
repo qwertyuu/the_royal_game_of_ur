@@ -9,22 +9,37 @@ mkdir -p /app/storage/framework/sessions
 mkdir -p /app/storage/framework/views
 mkdir -p /app/bootstrap/cache
 
-# Set ownership and permissions
+# Set ownership and permissions (must be done AFTER directories are created)
+# Force fix permissions even if they exist from build
 chown -R www-data:www-data /app/storage /app/bootstrap/cache
 chmod -R 775 /app/storage /app/bootstrap/cache
 
-# Wait for database to be ready
+# Ensure log directory specifically has correct permissions
+chown -R www-data:www-data /app/storage/logs
+chmod -R 775 /app/storage/logs
+
+# Wait for database to be ready with better connection testing
 echo "Waiting for database connection..."
-until php artisan migrate:status > /dev/null 2>&1; do
-  echo "Database not ready, waiting..."
-  sleep 2
+max_attempts=30
+attempt=0
+
+until mysql -h${DB_HOST} -u${DB_USERNAME} -p${DB_PASSWORD} -e "SELECT 1" ${DB_DATABASE} > /dev/null 2>&1; do
+  attempt=$((attempt + 1))
+  if [ $attempt -ge $max_attempts ]; then
+    echo "Database connection failed after $max_attempts attempts"
+    exit 1
+  fi
+  echo "Database not ready (attempt $attempt/$max_attempts), waiting..."
+  sleep 3
 done
+
+echo "Database connection established!"
 
 # Run migrations
 echo "Running database migrations..."
-php artisan migrate --force
+cd /app && php artisan migrate --force
 
 echo "Application initialized successfully!"
 
-# Start supervisord
+# Start supervisord as www-data to prevent permission issues
 exec "$@"
