@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  app:
+    image: ghcr.io/qwertyuu/the_royal_game_of_ur:latest
+    ports:
+      - "${APP_PORT:-8000}:80"
+    environment:
+      - APP_NAME=${APP_NAME:-The Royal Game of Ur}
+      - APP_ENV=${APP_ENV:-production}
+      - APP_KEY=${APP_KEY}
+      - APP_DEBUG=${APP_DEBUG:-false}
+      - APP_URL=${APP_URL:-http://localhost:8000}
+      - APP_TIMEZONE=${APP_TIMEZONE:-UTC}
+      - LOG_CHANNEL=${LOG_CHANNEL:-stack}
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE:-royal_game_ur}
+      - DB_USERNAME=${DB_USERNAME:-ur_user}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - CACHE_DRIVER=${CACHE_DRIVER:-file}
+      - QUEUE_CONNECTION=${QUEUE_CONNECTION:-sync}
+      - UR_NEAT_BASEURL=${UR_NEAT_BASEURL:-http://localhost:8090}
+    volumes:
+      - app_storage:/app/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - ur_network
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_DATABASE:-royal_game_ur}
+      - MYSQL_USER=${DB_USERNAME:-ur_user}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "${DB_EXTERNAL_PORT:-3307}:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - ur_network
+    restart: unless-stopped
+
+  # Optional: AI Bot Service (Neato Bot)
+  ur-bot:
+    image: qwertyuu/go-ur:latest
+    ports:
+      - "${UR_BOT_PORT:-8090}:8090"
+    environment:
+      - PORT=8090
+    networks:
+      - ur_network
+    restart: unless-stopped
+    profiles:
+      - ai-bot
+
+volumes:
+  db_data:
+    driver: local
+  app_storage:
+    driver: local
+
+networks:
+  ur_network:
+    driver: bridge

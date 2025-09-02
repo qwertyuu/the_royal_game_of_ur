@@ -52,6 +52,11 @@ COPY docker_resources/default-alpine /etc/nginx/http.d/default.conf
 COPY docker_resources/supervisord-alpine.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker_resources/php-fpm-alpine.conf /usr/local/etc/php-fpm.d/www.conf
 
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 EXPOSE 80
 
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
