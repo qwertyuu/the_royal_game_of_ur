@@ -1,34 +1,62 @@
-# Utiliser l'image PHP 8.0 avec FPM
-FROM php:8.0-fpm
+# Ultra-optimized Dockerfile using Alpine Linux
+FROM php:8.0-fpm-alpine
 
-# Installer les dépendances système nécessaires
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip \
+# Install runtime dependencies and PHP extensions in one layer
+RUN apk add --no-cache \
     nginx \
-    supervisor
+    supervisor \
+    # PHP extension dependencies
+    libpng \
+    libjpeg-turbo \
+    freetype \
+    oniguruma \
+    libxml2 \
+    # Temporary build dependencies
+    && apk add --no-cache --virtual .build-deps \
+        $PHPIZE_DEPS \
+        libpng-dev \
+        libjpeg-turbo-dev \
+        freetype-dev \
+        oniguruma-dev \
+        libxml2-dev \
+    # Configure and install PHP extensions
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+        pdo_mysql \
+        mbstring \
+        exif \
+        pcntl \
+        bcmath \
+        gd \
+    # Clean up build dependencies
+    && apk del .build-deps \
+    # Create nginx run directory
+    && mkdir -p /run/nginx
 
-# Nettoyer le cache APT
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Installer les extensions PHP requises
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
-
-# Installer Composer
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Exposer le port 9000 pour PHP-FPM
-EXPOSE 9000
-ADD docker_resources/run.sh /run.sh
-ADD docker_resources/www.conf /usr/local/etc/php-fpm.d/www.conf
-ADD docker_resources/default /etc/nginx/sites-enabled/
-ADD docker_resources/nginx.conf /etc/nginx/
-ADD docker_resources/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY . /app/
-RUN cd /app && mkdir -p storage/framework/sessions storage/framework/cache storage/framework/views bootstrap/cache && composer install
-ENTRYPOINT ["/usr/bin/supervisord"]
+# Copy application files
+WORKDIR /app
+COPY . .
+
+# Install production dependencies and setup directories
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress \
+    && composer clear-cache \
+    && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache
+
+# Copy optimized configurations
+COPY docker_resources/nginx-alpine.conf /etc/nginx/nginx.conf
+COPY docker_resources/default-alpine /etc/nginx/http.d/default.conf
+COPY docker_resources/supervisord-alpine.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker_resources/php-fpm-alpine.conf /usr/local/etc/php-fpm.d/www.conf
+
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+EXPOSE 80
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
