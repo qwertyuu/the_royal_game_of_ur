@@ -9,7 +9,9 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     zip \
-    unzip
+    unzip \
+    nginx \
+    supervisor
 
 # Nettoyer le cache APT
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -23,10 +25,10 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Exposer le port 9000 pour PHP-FPM
 EXPOSE 9000
 ADD docker_resources/run.sh /run.sh
-ADD docker_resources/www.conf /etc/php/7.4/fpm/pool.d/www.conf
+ADD docker_resources/www.conf /usr/local/etc/php-fpm.d/www.conf
 ADD docker_resources/default /etc/nginx/sites-enabled/
 ADD docker_resources/nginx.conf /etc/nginx/
 ADD docker_resources/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY . /app/
-RUN cd /app && mkdir storage/framework/sessions && composer install
+RUN cd /app && mkdir -p storage/framework/sessions storage/framework/cache storage/framework/views bootstrap/cache && composer install
 ENTRYPOINT ["/usr/bin/supervisord"]
