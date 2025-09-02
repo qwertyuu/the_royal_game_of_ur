@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   app:
-    image: ghcr.io/qwertyuu/the_royal_game_of_ur:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "${APP_PORT:-8000}:80"
     environment:

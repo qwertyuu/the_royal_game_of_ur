@@ -6,6 +6,7 @@ RUN apk add --no-cache \
     nginx \
     supervisor \
     mysql-client \
+    netcat-openbsd \
     # PHP extension dependencies
     libpng \
     libjpeg-turbo \

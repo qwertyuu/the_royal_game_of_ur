@@ -23,7 +23,7 @@ echo "Waiting for database connection..."
 max_attempts=30
 attempt=0
 
-until mysql -h${DB_HOST} -u${DB_USERNAME} -p${DB_PASSWORD} -e "SELECT 1" ${DB_DATABASE} > /dev/null 2>&1; do
+until nc -z ${DB_HOST} 3306; do
   attempt=$((attempt + 1))
   if [ $attempt -ge $max_attempts ]; then
     echo "Database connection failed after $max_attempts attempts"
