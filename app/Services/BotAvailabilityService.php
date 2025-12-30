@@ -39,15 +39,15 @@ class BotAvailabilityService
         }
 
         try {
-            // POST a minimal request to /infer endpoint
+            // POST a plausible game state to /infer endpoint to test availability
             $this->guzzleClient->post($baseUrl . '/infer', [
                 'timeout' => 2,
                 'connect_timeout' => 2,
                 'body' => json_encode([
-                    'pawn_per_player' => 0,
+                    'pawn_per_player' => 7,
                     'ai_pawn_out' => 0,
                     'enemy_pawn_out' => 0,
-                    'dice' => 0,
+                    'dice' => 3,
                     'ai_pawn_positions' => [],
                     'enemy_pawn_positions' => [],
                 ]),
