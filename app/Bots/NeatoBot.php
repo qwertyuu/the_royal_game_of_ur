@@ -4,6 +4,7 @@ namespace App\Bots;
 
 use App\Entities\BotMove;
 use App\Models\PlayerChip;
+use App\Services\BotAvailabilityService;
 use GuzzleHttp\Client;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -22,11 +23,18 @@ class NeatoBot implements Bot
     private Client $guzzleClient;
 
     /**
-     * @param Client $guzzleClient
+     * @var BotAvailabilityService
      */
-    public function __construct(Client $guzzleClient)
+    private BotAvailabilityService $availabilityService;
+
+    /**
+     * @param Client $guzzleClient
+     * @param BotAvailabilityService $availabilityService
+     */
+    public function __construct(Client $guzzleClient, BotAvailabilityService $availabilityService)
     {
         $this->guzzleClient = $guzzleClient;
+        $this->availabilityService = $availabilityService;
     }
 
     /**
@@ -89,6 +97,13 @@ class NeatoBot implements Bot
                 $enemy_pawn_course_indices[] = $course_index;
             }
         }
+        $baseUrl = config('ur_neat.baseurl');
+
+        // Check if NEATO service is available
+        if (!$this->availabilityService->isAvailable($baseUrl)) {
+            throw new \Exception("NEATO service unavailable at {$baseUrl}");
+        }
+
         $body = json_encode([
             'pawn_per_player' => $pawn_per_player,
             'ai_pawn_out' => $bot_pawn_out,
@@ -97,8 +112,11 @@ class NeatoBot implements Bot
             'ai_pawn_positions' => $bot_pawn_course_indices,
             'enemy_pawn_positions' => $enemy_pawn_course_indices,
         ]);
-        $response = $this->guzzleClient->post(config('ur_neat.baseurl') . '/infer', [
+
+        $response = $this->guzzleClient->post($baseUrl . '/infer', [
             'body' => $body,
+            'timeout' => 5,
+            'connect_timeout' => 5,
         ]);
 
         $decoded_response = json_decode($response->getBody(), true);

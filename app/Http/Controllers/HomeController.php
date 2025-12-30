@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Game;
 use App\Models\PlayerChip;
+use App\Services\BotAvailabilityService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -57,9 +58,10 @@ class HomeController extends Controller
 
     /**
      * @param Request $request
+     * @param BotAvailabilityService $availabilityService
      * @return Response|View|Application|ResponseFactory
      */
-    public function index(Request $request)
+    public function index(Request $request, BotAvailabilityService $availabilityService)
     {
         $request->session()->start();
 
@@ -166,10 +168,12 @@ class HomeController extends Controller
                 'uri_sans_get' => $uri_sans_get,
             ]);
         } elseif ($request->session()->get('en_creation')) {
+            $neato_available = $availabilityService->isAvailable(config('ur_neat.baseurl'));
             return view('main.creating_game', [
                 'game_id' => $request->session()->get('game_id'),
                 'host' => $host,
                 'uri_sans_get' => $uri_sans_get,
+                'neato_available' => $neato_available,
             ]);
         }
     }
